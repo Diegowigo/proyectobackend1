@@ -1,6 +1,6 @@
 import fs from "fs";
 
-class CartManager {
+export class CartManager {
   constructor(cartData) {
     this.path = cartData;
   }
@@ -44,3 +44,5 @@ const app = async () => {
 };
 
 app();
+
+export default CartManager;

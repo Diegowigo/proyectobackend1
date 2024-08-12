@@ -1,119 +1,114 @@
-class ProductManager {
-  constructor(productsData) {
-    this.path = productsData;
-  }
+import fs from "fs";
+import path from "path";
 
-  async getProducts() {
-    if (fs.existsSync(this.path)) {
-      return JSON.parse(
-        await fs.promises.readFile(this.path, { encoding: "utf-8" })
+const productsPath = path.resolve("src/data/products.json");
+
+class ProductsManager {
+  static async getProducts() {
+    if (fs.existsSync(productsPath)) {
+      const products = JSON.parse(
+        await fs.promises.readFile(productsPath, "utf-8")
       );
+      return products;
     } else {
       return [];
     }
   }
 
-  async addProduct(
-    title,
-    description,
-    code,
-    price,
-    status,
-    stock,
-    category,
-    thumbnails
-  ) {
-    let products = this.getProducts();
+  static async addProduct(product = {}) {
+    try {
+      const products = await this.getProducts();
 
-    let id = 1;
-    if (this.products.length > 0) {
-      id = this.products[this.products.length - 1].id + 1;
+      let id = 1;
+      if (products.length > 0) {
+        id = products[products.length - 1].id + 1;
+      }
+
+      const { code } = product;
+
+      const existCode = products.find((p) => p.code === code);
+      if (existCode) {
+        console.log(`The product with code ${code} is already registered`);
+        return null;
+      }
+
+      const newProduct = {
+        id,
+        ...product,
+      };
+
+      products.push(newProduct);
+
+      await fs.promises.writeFile(
+        productsPath,
+        JSON.stringify(products, null, 2)
+      );
+
+      console.log(`Product added with id: ${id}`);
+      return newProduct;
+    } catch (error) {
+      console.error("Error adding the product:", error);
+      throw new Error("Error adding the product");
     }
-
-    // validaciones
-    let existCode = this.products.find((product) => product.code === code);
-    if (existCode) {
-      console.log(`El producto de código ${code} ya está ingresado`);
-      return;
-    }
-
-    products.push({
-      id,
-      title,
-      description,
-      code,
-      price,
-      status,
-      stock,
-      category,
-      thumbnails,
-    });
-
-    await fs.promises.writeFile(
-      this.path,
-      JSON.stringify(this.products, null, 2)
-    );
-    console.log(`Producto añadido con id: ${id} y título: ${title}`);
   }
 
-  // let existTitle = this.products.find((product) => product.title === title);
-  // if (existTitle) {
-  //   console.log(`El producto ya tiene título: ${title}`);
-  //   return;
-  // }
+  static async updateProduct(id, updatedFields = {}) {
+    try {
+      const products = await this.getProducts();
 
-  // let existDescription = this.products.find(
-  //   (product) => product.description === description
-  // );
-  // if (existDescription) {
-  //   console.log(`El producto ya tiene descripción: ${description}`);
-  //   return;
-  // }
+      const productId = Number(id);
 
-  // let existPrice = this.products.find((product) => product.price === price);
-  // if (existPrice) {
-  //   console.log(`El producto ya tiene precio: ${price}`);
-  //   return;
-  // }
+      const index = products.findIndex((p) => p.id === productId);
 
-  // let existThumbnail = this.products.find(
-  //   (product) => product.thumbnail === thumbnail
-  // );
-  // if (existThumbnail) {
-  //   console.log(`El producto ya tiene imagen: ${thumbnail}`);
-  //   return;
-  // }
+      if (index === -1) {
+        console.log(`Product with id ${productId} not found.`);
+        return null;
+      }
 
-  //   let existStock = this.products.find((product) => product.stock === stock);
-  //   if (existStock) {
-  //     console.log(`El producto ya tiene stock: ${stock}`);
-  //     return;
-  //   }
-  // }
+      products[index] = {
+        ...products[index],
+        ...updatedFields,
+      };
 
-  getProducts() {
-    return this.products;
+      await fs.promises.writeFile(
+        productsPath,
+        JSON.stringify(products, null, 2)
+      );
+
+      return products[index];
+    } catch (error) {
+      console.error("Error updating product:", error.message);
+      throw new Error("Error updating product");
+    }
   }
 
-  getProductById(code) {
-    let product = this.products.find((product) => product.code === code);
-    if (product) {
-      console.log(product);
-    } else {
-      console.error("Product not found");
+  static async deleteProduct(id) {
+    try {
+      let products = await this.getProducts();
+
+      const productId = Number(id);
+
+      const index = products.findIndex((p) => p.id === productId);
+
+      if (index === -1) {
+        console.log(`Product with id ${productId} not found.`);
+        return null;
+      }
+
+      const deletedProduct = products.splice(index, 1)[0];
+
+      await fs.promises.writeFile(
+        productsPath,
+        JSON.stringify(products, null, 2)
+      );
+
+      console.log(`Product with id ${productId} deleted successfully.`);
+      return deletedProduct;
+    } catch (error) {
+      console.error("Error deleting product:", error.message);
+      throw new Error("Error deleting product");
     }
   }
 }
 
-const productManager = new ProductManager("../data/products.js");
-
-const app = async () => {
-  productManager.addProduct("Televisor", "Televisor Samsung", 750, "img1", 50);
-  productManager.addProduct("Celular", "Celular Samsung", 550, "img2", 20);
-  productManager.addProduct("Tablet", "Tablet Samsung", 250, "img3", 30);
-
-  console.log(productManager.getProducts());
-  console.log(productManager.getProductById(2));
-};
-
-app();
+export default ProductsManager;
