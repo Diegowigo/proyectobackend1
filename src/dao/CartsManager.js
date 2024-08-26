@@ -5,16 +5,24 @@ const cartsPath = path.resolve("src/data/carts.json");
 
 class CartsManager {
   static async getCarts() {
-    if (fs.existsSync(cartsPath)) {
-      const data = await fs.promises.readFile(cartsPath, "utf-8");
-      return JSON.parse(data);
-    } else {
-      return [];
+    try {
+      if (fs.existsSync(cartsPath)) {
+        const data = await fs.promises.readFile(cartsPath, "utf-8");
+        return JSON.parse(data);
+      } else {
+        return [];
+      }
+    } catch (error) {
+      throw new Error(`Error reading carts: ${error.message}`);
     }
   }
 
   static async saveCarts(carts) {
-    await fs.promises.writeFile(cartsPath, JSON.stringify(carts, null, 2));
+    try {
+      await fs.promises.writeFile(cartsPath, JSON.stringify(carts, null, 2));
+    } catch (error) {
+      throw new Error(`Error saving carts: ${error.message}`);
+    }
   }
 
   static async createCart() {
@@ -34,10 +42,9 @@ class CartsManager {
       carts.push(newCart);
       await this.saveCarts(carts);
 
-      console.log(`Cart created with id: ${id}`);
       return newCart;
     } catch (error) {
-      throw new Error("Error creating cart");
+      throw new Error(`Error creating cart: ${error.message}`);
     }
   }
 
@@ -47,13 +54,12 @@ class CartsManager {
       const cart = carts.find((c) => c.id === id);
 
       if (!cart) {
-        return null;
+        throw new Error(`Cart with id ${id} not found`);
       }
 
       return cart.products;
     } catch (error) {
-      console.error("Error getting cart products:", error.message);
-      throw new Error("Error getting cart products");
+      throw new Error(`Error getting cart products: ${error.message}`);
     }
   }
 
@@ -63,12 +69,10 @@ class CartsManager {
       const cart = carts.find((c) => c.id === cartId);
 
       if (!cart) {
-        console.error(`Cart with id ${cartId} not found`);
-        return null;
+        throw new Error(`Cart with id ${cartId} not found`);
       }
 
       const productID = Number(productId);
-
       const existingProduct = cart.products.find(
         (p) => p.product === productID
       );
@@ -84,13 +88,9 @@ class CartsManager {
 
       await this.saveCarts(carts);
 
-      console.log(
-        `Product with id ${productID} added to cart with id ${cartId}`
-      );
       return cart;
     } catch (error) {
-      console.error("Error adding product to cart:", error.message);
-      throw new Error("Error adding product to cart");
+      throw new Error(`Error adding product to cart: ${error.message}`);
     }
   }
 }

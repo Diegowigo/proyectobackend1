@@ -5,13 +5,17 @@ const productsPath = path.resolve("src/data/products.json");
 
 class ProductsManager {
   static async getProducts() {
-    if (fs.existsSync(productsPath)) {
-      const products = JSON.parse(
-        await fs.promises.readFile(productsPath, "utf-8")
-      );
-      return products;
-    } else {
-      return [];
+    try {
+      if (fs.existsSync(productsPath)) {
+        const products = JSON.parse(
+          await fs.promises.readFile(productsPath, "utf-8")
+        );
+        return products;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      throw new Error(`Error reading products: ${error.message}`);
     }
   }
 
@@ -28,8 +32,8 @@ class ProductsManager {
 
       const existCode = products.find((p) => p.code === code);
       if (existCode) {
-        console.log(`The product with code ${code} is already registered`);
-        return null;
+        const errorMessage = `The product with code ${code} is already registered.`;
+        throw new Error(errorMessage);
       }
 
       const newProduct = {
@@ -44,11 +48,9 @@ class ProductsManager {
         JSON.stringify(products, null, 2)
       );
 
-      console.log(`Product added with id: ${id}`);
       return newProduct;
     } catch (error) {
-      console.error("Error adding the product:", error);
-      throw new Error("Error adding the product");
+      throw new Error(`Error adding the product: ${error.message}`);
     }
   }
 
@@ -61,8 +63,8 @@ class ProductsManager {
       const index = products.findIndex((p) => p.id === productId);
 
       if (index === -1) {
-        console.log(`Product with id ${productId} not found.`);
-        return null;
+        const errorMessage = `Product with id ${productId} not found.`;
+        throw new Error(errorMessage);
       }
 
       products[index] = {
@@ -77,22 +79,21 @@ class ProductsManager {
 
       return products[index];
     } catch (error) {
-      console.error("Error updating product:", error.message);
-      throw new Error("Error updating product");
+      throw new Error(`Error updating product: ${error.message}`);
     }
   }
 
   static async deleteProduct(id) {
     try {
-      let products = await this.getProducts();
+      const products = await this.getProducts();
 
       const productId = Number(id);
 
       const index = products.findIndex((p) => p.id === productId);
 
       if (index === -1) {
-        console.log(`Product with id ${productId} not found.`);
-        return null;
+        const errorMessage = `Product with id ${productId} not found.`;
+        throw new Error(errorMessage);
       }
 
       const deletedProduct = products.splice(index, 1)[0];
@@ -102,11 +103,9 @@ class ProductsManager {
         JSON.stringify(products, null, 2)
       );
 
-      console.log(`Product with id ${productId} deleted successfully.`);
       return deletedProduct;
     } catch (error) {
-      console.error("Error deleting product:", error.message);
-      throw new Error("Error deleting product");
+      throw new Error(`Error deleting product: ${error.message}`);
     }
   }
 }
