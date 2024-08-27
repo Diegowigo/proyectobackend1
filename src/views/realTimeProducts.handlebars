@@ -7,23 +7,24 @@
 </head>
 <body>
   <h1>Productos</h1>
-  {{#if products.length}}
-    <ul id="productList">
-      {{#each products}}
-        <li>
-          <strong>Título:</strong> {{this.title}} <br>
-          <strong>Descripción:</strong> {{this.description}} <br>
-          <strong>Código de Producto:</strong> {{this.code}} <br>
-          <strong>Precio:</strong> ${{this.price}} <br>
-          <strong>Stock:</strong> {{this.stock}} <br>
-          <strong>Categoría:</strong> {{this.category}} <br>
-        </li>
-        <hr>
-      {{/each}}
-    </ul>
-  {{else}}
-    <p>No hay productos disponibles.</p>
-  {{/if}}
+{{#if products.length}}
+  <ul id="productList">
+    {{#each products}}
+      <li id="product-{{this.id}}">
+        <strong>Título:</strong> {{this.title}} <br>
+        <strong>Descripción:</strong> {{this.description}} <br>
+        <strong>Código de Producto:</strong> {{this.code}} <br>
+        <strong>Precio:</strong> ${{this.price}} <br>
+        <strong>Stock:</strong> {{this.stock}} <br>
+        <strong>Categoría:</strong> {{this.category}} <br>
+        <button onclick="deleteProduct('{{this.id}}')">Eliminar</button>
+      </li>
+      <hr>
+    {{/each}}
+  </ul>
+{{else}}
+  <p>No hay productos disponibles.</p>
+{{/if}}
 
   <h2>Agregar Producto:</h2>
   <form id="productForm">

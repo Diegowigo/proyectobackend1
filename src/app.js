@@ -39,6 +39,15 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("deleteProduct", async (id) => {
+    try {
+      await ProductsManager.deleteProduct(id);
+      io.emit("productDeleted", id);
+    } catch (error) {
+      console.error("Error deleting product:", error.message);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("Cliente desconectado");
   });

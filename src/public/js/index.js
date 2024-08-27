@@ -20,16 +20,29 @@ socket.on("productAdded", (product) => {
   const productList = document.getElementById("productList");
   if (productList) {
     const productItem = `
-      <li>
+      <li id="product-${product.id}">
         <strong>Título:</strong> ${product.title} <br>
         <strong>Descripción:</strong> ${product.description} <br>
         <strong>Código de Producto:</strong> ${product.code} <br>
         <strong>Precio:</strong> $${product.price} <br>
         <strong>Stock:</strong> ${product.stock} <br>
         <strong>Categoría:</strong> ${product.category} <br>
+        <button onclick="deleteProduct('${product.id}')">Eliminar</button>
       </li>
       <hr>
     `;
     productList.innerHTML += productItem;
+  }
+});
+
+const deleteProduct = (id) => {
+  socket.emit("deleteProduct", id);
+};
+
+socket.on("productDeleted", (id) => {
+  console.log("Deleting product with ID:", id);
+  const product = document.getElementById(`product-${id}`);
+  if (product) {
+    product.remove();
   }
 });
