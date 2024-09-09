@@ -24,3 +24,8 @@ router.get("/realtimeproducts", async (req, res) => {
     res.status(500).json({ error: "Error fetching products" });
   }
 });
+
+// router.put("/realtimeproducts", (req, res) => {
+//   res.setHeader("Content-Type", "text/html");
+//   res.status(200).json({});
+// });

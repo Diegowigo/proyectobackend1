@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import Swal from "sweetalert2";
 
 const productsPath = path.resolve("src/data/products.json");
 
@@ -47,7 +48,6 @@ class ProductsManager {
         productsPath,
         JSON.stringify(products, null, 2)
       );
-
       return newProduct;
     } catch (error) {
       throw new Error(`Error adding the product: ${error.message}`);

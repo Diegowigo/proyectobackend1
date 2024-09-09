@@ -46,3 +46,16 @@ socket.on("productDeleted", (id) => {
     product.remove();
   }
 });
+
+// terminar updatre product frontend
+const updateProduct = (id) => {
+  socket.emit("updateProduct", id);
+};
+
+socket.on("productUpdated", (id) => {
+  console.log("Product updated with ID:", id);
+  const product = document.getElementById(`product-${id}`);
+  if (product) {
+    // product.remove();
+  }
+});
