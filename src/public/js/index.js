@@ -17,51 +17,45 @@ if (form) {
 }
 
 const editProduct = (id) => {
-  // Muestra el formulario de edición
   const editFormContainer = document.getElementById("editFormContainer");
-  const editProductId = document.getElementById("editProductId");
-  const editTitle = document.getElementById("editTitle");
-  const editDescription = document.getElementById("editDescription");
-  const editCode = document.getElementById("editCode");
-  const editPrice = document.getElementById("editPrice");
-  const editStock = document.getElementById("editStock");
-  const editCategory = document.getElementById("editCategory");
+  editFormContainer.style.display = "block";
 
-  // Llena el formulario con los datos actuales del producto
-  const product = document.getElementById(`product-${id}`);
-  if (product) {
-    editProductId.value = id;
-    editTitle.value = product
+  const productItem = document.getElementById(`product-${id}`);
+  if (productItem) {
+    const title = productItem
       .querySelector("strong:nth-of-type(1)")
-      .innerText.split(": ")[1];
-    editDescription.value = product
+      .nextSibling.nodeValue.trim();
+    const description = productItem
       .querySelector("strong:nth-of-type(2)")
-      .innerText.split(": ")[1];
-    editCode.value = product
+      .nextSibling.nodeValue.trim();
+    const code = productItem
       .querySelector("strong:nth-of-type(3)")
-      .innerText.split(": ")[1];
-    editPrice.value = product
+      .nextSibling.nodeValue.trim();
+    const price = productItem
       .querySelector("strong:nth-of-type(4)")
-      .innerText.split(": ")[1];
-    editStock.value = product
+      .nextSibling.nodeValue.trim()
+      .replace("$", "");
+    const stock = productItem
       .querySelector("strong:nth-of-type(5)")
-      .innerText.split(": ")[1];
-    editCategory.value = product
+      .nextSibling.nodeValue.trim();
+    const category = productItem
       .querySelector("strong:nth-of-type(6)")
-      .innerText.split(": ")[1];
+      .nextSibling.nodeValue.trim();
 
-    editFormContainer.style.display = "block";
+    document.getElementById("editProductId").value = id;
+    document.getElementById("editTitle").value = title;
+    document.getElementById("editDescription").value = description;
+    document.getElementById("editCode").value = code;
+    document.getElementById("editPrice").value = price;
+    document.getElementById("editStock").value = stock;
+    document.getElementById("editCategory").value = category;
   }
 };
 
-// Función para cancelar la edición
 const cancelEdit = () => {
-  // Oculta el formulario de edición
-  const editFormContainer = document.getElementById("editFormContainer");
-  editFormContainer.style.display = "none";
+  document.getElementById("editFormContainer").style.display = "none";
 };
 
-// Manejar el envío del formulario de edición
 const editForm = document.getElementById("editProductForm");
 if (editForm) {
   editForm.addEventListener("submit", (e) => {
@@ -114,7 +108,7 @@ socket.on("productAdded", (product) => {
         <strong>Precio:</strong> $${product.price} <br>
         <strong>Stock:</strong> ${product.stock} <br>
         <strong>Categoría:</strong> ${product.category} <br>
-        <button onclick="updateProduct"('${product.id}')>Editar Producto</button>
+        <button onclick="editProduct"('${product.id}')>Editar Producto</button>
         <button onclick="deleteProduct"('${product.id}')>Eliminar</button>
       </li>
       <hr>
@@ -136,9 +130,8 @@ const deleteProduct = (id) => {
 };
 
 socket.on("productDeleted", (id) => {
-  console.log("Deleting product with ID:", id);
-  const product = document.getElementById(`product-${id}`);
-  if (product) {
-    product.remove();
+  const productItem = document.getElementById(`product-${id}`);
+  if (productItem) {
+    productItem.remove();
   }
 });
