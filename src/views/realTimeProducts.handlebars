@@ -17,7 +17,7 @@
         <strong>Precio:</strong> ${{this.price}} <br>
         <strong>Stock:</strong> {{this.stock}} <br>
         <strong>Categoría:</strong> {{this.category}} <br>
-        <button onclick="updateProduct"('{{this.id}}')>Editar Producto</button>
+        <button onclick="editProduct('{{this.id}}')">Editar Producto</button>
         <button onclick="deleteProduct('{{this.id}}')">Eliminar</button>
       </li>
       <hr>
@@ -26,6 +26,34 @@
 {{else}}
   <p>No hay productos disponibles.</p>
 {{/if}}
+
+ <div id="editFormContainer" style="display: none;">
+  <h2>Editar Producto:</h2>
+  <form id="editProductForm">
+    <input type="hidden" id="editProductId" name="id" required>
+
+    <label for="editTitle">Título:</label>
+    <input type="text" id="editTitle" name="title" required><br><br>
+
+    <label for="editDescription">Descripción:</label>
+    <textarea id="editDescription" name="description" required></textarea><br><br>
+
+    <label for="editCode">Código de Producto:</label>
+    <input type="text" id="editCode" name="code" required><br><br>
+
+    <label for="editPrice">Precio:</label>
+    <input type="number" id="editPrice" name="price" required><br><br>
+
+    <label for="editStock">Stock:</label>
+    <input type="number" id="editStock" name="stock" required><br><br>
+
+    <label for="editCategory">Categoría:</label>
+    <input type="text" id="editCategory" name="category" required><br><br>
+
+    <button type="submit">Actualizar Producto</button>
+    <button type="button" onclick="cancelEdit()">Cancelar</button>
+  </form>
+</div>
 
   <h2>Agregar Producto:</h2>
   <form id="productForm">
@@ -51,6 +79,7 @@
   </form>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/js/index.js"></script>
 </body>
 </html>

@@ -35,6 +35,11 @@ io.on("connection", (socket) => {
       const addedProduct = await ProductsManager.addProduct(product);
       io.emit("productAdded", addedProduct);
     } catch (error) {
+      io.emit("productError", {
+        icon: "error",
+        title: "Error adding product",
+        text: error.message,
+      });
       console.error("Error adding product:", error.message);
     }
   });
@@ -48,11 +53,19 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("updateProduct", async (id) => {
+  socket.on("updateProduct", async ({ id, updatedFields }) => {
     try {
-      await ProductsManager.updateProduct(id);
-      io.emit("productUpdated", id);
+      const updatedProduct = await ProductsManager.updateProduct(
+        id,
+        updatedFields
+      );
+      io.emit("productUpdated", updatedProduct);
     } catch (error) {
+      io.emit("productError", {
+        icon: "error",
+        title: "Error updating product",
+        text: error.message,
+      });
       console.error("Error updating product:", error.message);
     }
   });

@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import Swal from "sweetalert2";
 
 const productsPath = path.resolve("src/data/products.json");
 
@@ -65,6 +64,16 @@ class ProductsManager {
       if (index === -1) {
         const errorMessage = `Product with id ${productId} not found.`;
         throw new Error(errorMessage);
+      }
+
+      if (updatedFields.code) {
+        const codeExists = products.some(
+          (p) => p.code === updatedFields.code && p.id !== productId
+        );
+        if (codeExists) {
+          const errorMessage = `The product code ${updatedFields.code} is already in use.`;
+          throw new Error(errorMessage);
+        }
       }
 
       products[index] = {
