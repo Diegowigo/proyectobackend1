@@ -2,12 +2,14 @@ import express from "express";
 import { engine } from "express-handlebars";
 import { Server } from "socket.io";
 import ProductsManager from "./dao/ProductsManager.js";
+import { config } from "./config/config.js";
 
 import { router as productsRouter } from "./routes/productsRouter.js";
 import { router as cartsRouter } from "./routes/cartsRouter.js";
 import { router as viewsRouter } from "./routes/viewsRouter.js";
+import { connDB } from "./connDB.js";
 
-const PORT = 8080;
+const PORT = config.PORT;
 const app = express();
 
 app.use(express.json());
@@ -25,10 +27,12 @@ const server = app.listen(PORT, () => {
   console.log(`Server escuchando el puerto ${PORT}`);
 });
 
+connDB();
+
 const io = new Server(server);
 
 io.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado");
+  console.log("New client connected");
 
   socket.on("newProduct", async (product) => {
     try {
@@ -71,6 +75,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Cliente desconectado");
+    console.log("Client disconnected");
   });
 });

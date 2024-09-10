@@ -1,85 +1,102 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Real-Time Products</title>
-</head>
-<body>
-  <h1>Productos</h1>
-{{#if products.length}}
-  <ul id="productList">
-    {{#each products}}
-      <li id="product-{{this.id}}">
-        <strong>Título:</strong> {{this.title}} <br>
-        <strong>Descripción:</strong> {{this.description}} <br>
-        <strong>Código de Producto:</strong> {{this.code}} <br>
-        <strong>Precio:</strong> ${{this.price}} <br>
-        <strong>Stock:</strong> {{this.stock}} <br>
-        <strong>Categoría:</strong> {{this.category}} <br>
-        <button onclick="editProduct('{{this.id}}')">Editar Producto</button>
-        <button onclick="deleteProduct('{{this.id}}')">Eliminar</button>
-      </li>
-      <hr>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No hay productos disponibles.</p>
-{{/if}}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Products</title>
+  </head>
+  <body>
+    <h1>Productos</h1>
+    {{#if products.length}}
+      <ul id="productList">
+        {{#each products}}
+          <li id="product-{{this._id}}">
+            <strong class="title">Título:</strong>
+            {{this.title}}
+            <br />
+            <strong class="description">Descripción:</strong>
+            {{this.description}}
+            <br />
+            <strong class="code">Código de Producto:</strong>
+            {{this.code}}
+            <br />
+            <strong class="price">Precio:</strong>
+            ${{this.price}}
+            <br />
+            <strong class="stock">Stock:</strong>
+            {{this.stock}}
+            <br />
+            <strong class="category">Categoría:</strong>
+            {{this.category}}
+            <br />
+            <button onclick="editProduct('{{this._id}}')">Editar Producto</button>
+            <button onclick="deleteProduct('{{this._id}}')">Eliminar</button>
+          </li>
+          <hr />
+        {{/each}}
+      </ul>
+    {{else}}
+      <p>No hay productos disponibles.</p>
+    {{/if}}
 
- <div id="editFormContainer" style="display: none;">
-  <h2>Editar Producto:</h2>
-  <form id="editProductForm">
-    <input type="hidden" id="editProductId" name="id" required>
+    <div id="editFormContainer" style="display: none;">
+      <h2>Editar Producto:</h2>
+      <form id="editProductForm">
+        <input type="hidden" id="editProductId" name="id" required />
 
-    <label for="editTitle">Título:</label>
-    <input type="text" id="editTitle" name="title" required><br><br>
+        <label for="editTitle">Título:</label>
+        <input type="text" id="editTitle" name="title" required /><br /><br />
 
-    <label for="editDescription">Descripción:</label>
-    <textarea id="editDescription" name="description" required></textarea><br><br>
+        <label for="editDescription">Descripción:</label>
+        <textarea
+          id="editDescription"
+          name="description"
+          required
+        ></textarea><br /><br />
 
-    <label for="editCode">Código de Producto:</label>
-    <input type="text" id="editCode" name="code" required><br><br>
+        <label for="editCode">Código de Producto:</label>
+        <input type="text" id="editCode" name="code" required /><br /><br />
 
-    <label for="editPrice">Precio:</label>
-    <input type="number" id="editPrice" name="price" required><br><br>
+        <label for="editPrice">Precio:</label>
+        <input type="number" id="editPrice" name="price" required /><br /><br />
 
-    <label for="editStock">Stock:</label>
-    <input type="number" id="editStock" name="stock" required><br><br>
+        <label for="editStock">Stock:</label>
+        <input type="number" id="editStock" name="stock" required /><br /><br />
 
-    <label for="editCategory">Categoría:</label>
-    <input type="text" id="editCategory" name="category" required><br><br>
+        <label for="editCategory">Categoría:</label>
+        <input type="text" id="editCategory" name="category" required /><br
+        /><br />
 
-    <button type="submit">Actualizar Producto</button>
-    <button type="button" onclick="cancelEdit()">Cancelar</button>
-  </form>
-</div>
+        <button type="submit">Actualizar Producto</button>
+        <button type="button" onclick="cancelEdit()">Cancelar</button>
+      </form>
+    </div>
 
-  <h2>Agregar Producto:</h2>
-  <form id="productForm">
-    <label for="title">Título:</label>
-    <input type="text" id="title" name="title" required><br><br>
+    <h2>Agregar Producto:</h2>
+    <form id="productForm">
+      <label for="title">Título:</label>
+      <input type="text" id="title" name="title" required /><br /><br />
 
-    <label for="description">Descripción:</label>
-    <textarea id="description" name="description" required></textarea><br><br>
+      <label for="description">Descripción:</label>
+      <textarea id="description" name="description" required></textarea><br
+      /><br />
 
-    <label for="code">Código de Producto:</label>
-    <input type="text" id="code" name="code" required><br><br>
+      <label for="code">Código de Producto:</label>
+      <input type="text" id="code" name="code" required /><br /><br />
 
-    <label for="price">Precio:</label>
-    <input type="number" id="price" name="price" required><br><br>
+      <label for="price">Precio:</label>
+      <input type="number" id="price" name="price" required /><br /><br />
 
-    <label for="stock">Stock:</label>
-    <input type="number" id="stock" name="stock" required><br><br>
+      <label for="stock">Stock:</label>
+      <input type="number" id="stock" name="stock" required /><br /><br />
 
-    <label for="category">Categoría:</label>
-    <input type="text" id="category" name="category" required><br><br>
+      <label for="category">Categoría:</label>
+      <input type="text" id="category" name="category" required /><br /><br />
 
-    <button type="submit">Agregar Producto</button>
-  </form>
+      <button type="submit">Agregar Producto</button>
+    </form>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="/js/index.js"></script>
-</body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/index.js"></script>
+  </body>
 </html>

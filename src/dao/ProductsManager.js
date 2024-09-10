@@ -1,52 +1,26 @@
-import fs from "fs";
-import path from "path";
-
-const productsPath = path.resolve("src/data/products.json");
+import { productsModel } from "./models/productsModel.js";
+import { isValidObjectId } from "mongoose";
 
 class ProductsManager {
   static async getProducts() {
     try {
-      if (fs.existsSync(productsPath)) {
-        const products = JSON.parse(
-          await fs.promises.readFile(productsPath, "utf-8")
-        );
-        return products;
-      } else {
-        return [];
-      }
+      return await productsModel.find().lean();
     } catch (error) {
-      throw new Error(`Error reading products: ${error.message}`);
+      throw new Error(`Error fetching products: ${error.message}`);
     }
   }
 
   static async addProduct(product = {}) {
     try {
-      const products = await this.getProducts();
-
-      let id = 1;
-      if (products.length > 0) {
-        id = products[products.length - 1].id + 1;
-      }
-
       const { code } = product;
 
-      const existCode = products.find((p) => p.code === code);
-      if (existCode) {
-        const errorMessage = `The product with code ${code} is already registered.`;
-        throw new Error(errorMessage);
+      const existingProduct = await productsModel.findOne({ code });
+      if (existingProduct) {
+        throw new Error(`The product with code ${code} is already registered.`);
       }
 
-      const newProduct = {
-        id,
-        ...product,
-      };
-
-      products.push(newProduct);
-
-      await fs.promises.writeFile(
-        productsPath,
-        JSON.stringify(products, null, 2)
-      );
+      const newProduct = new productsModel(product);
+      await newProduct.save();
       return newProduct;
     } catch (error) {
       throw new Error(`Error adding the product: ${error.message}`);
@@ -55,38 +29,33 @@ class ProductsManager {
 
   static async updateProduct(id, updatedFields = {}) {
     try {
-      const products = await this.getProducts();
-
-      const productId = Number(id);
-
-      const index = products.findIndex((p) => p.id === productId);
-
-      if (index === -1) {
-        const errorMessage = `Product with id ${productId} not found.`;
-        throw new Error(errorMessage);
+      if (!isValidObjectId(id)) {
+        throw new Error(`Invalid product ID: ${id}`);
       }
 
       if (updatedFields.code) {
-        const codeExists = products.some(
-          (p) => p.code === updatedFields.code && p.id !== productId
-        );
+        const codeExists = await productsModel
+          .findOne({
+            code: updatedFields.code,
+            _id: { $ne: id },
+          })
+          .lean();
         if (codeExists) {
-          const errorMessage = `The product code ${updatedFields.code} is already in use.`;
-          throw new Error(errorMessage);
+          throw new Error(
+            `The product code ${updatedFields.code} is already in use.`
+          );
         }
       }
 
-      products[index] = {
-        ...products[index],
-        ...updatedFields,
-      };
+      const updatedProduct = await productsModel
+        .findByIdAndUpdate(id, updatedFields, { new: true })
+        .lean();
 
-      await fs.promises.writeFile(
-        productsPath,
-        JSON.stringify(products, null, 2)
-      );
+      if (!updatedProduct) {
+        throw new Error(`Product with id ${id} not found.`);
+      }
 
-      return products[index];
+      return updatedProduct;
     } catch (error) {
       throw new Error(`Error updating product: ${error.message}`);
     }
@@ -94,23 +63,15 @@ class ProductsManager {
 
   static async deleteProduct(id) {
     try {
-      const products = await this.getProducts();
-
-      const productId = Number(id);
-
-      const index = products.findIndex((p) => p.id === productId);
-
-      if (index === -1) {
-        const errorMessage = `Product with id ${productId} not found.`;
-        throw new Error(errorMessage);
+      if (!isValidObjectId(id)) {
+        throw new Error(`Invalid product ID: ${id}`);
       }
 
-      const deletedProduct = products.splice(index, 1)[0];
+      const deletedProduct = await productsModel.findByIdAndDelete(id).lean();
 
-      await fs.promises.writeFile(
-        productsPath,
-        JSON.stringify(products, null, 2)
-      );
+      if (!deletedProduct) {
+        throw new Error(`Product with id ${id} not found.`);
+      }
 
       return deletedProduct;
     } catch (error) {

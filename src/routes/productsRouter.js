@@ -1,5 +1,6 @@
 import { Router } from "express";
 import ProductsManager from "../dao/ProductsManager.js";
+import { isValidObjectId } from "mongoose";
 
 export const router = Router();
 
@@ -10,7 +11,6 @@ router.get("/", async (req, res) => {
     if (limit && !isNaN(limit)) {
       products = products.slice(0, limit);
     }
-    res.setHeader("Content-Type", "application/json");
     res.status(200).json({ products });
   } catch (error) {
     console.error("Error fetching products:", error.message);
@@ -21,8 +21,10 @@ router.get("/", async (req, res) => {
 router.get("/:pid", async (req, res) => {
   try {
     const { pid } = req.params;
-    const products = await ProductsManager.getProducts();
-    const product = products.find((p) => p.id === Number(pid));
+    if (!isValidObjectId(pid)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
+    const product = await ProductsManager.getProductById(pid);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
@@ -57,6 +59,9 @@ router.post("/", async (req, res) => {
 router.put("/:pid", async (req, res) => {
   try {
     const productId = req.params.pid;
+    if (!isValidObjectId(productId)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
     const updatedProduct = req.body;
 
     if (Object.keys(updatedProduct).length === 0) {
@@ -74,7 +79,6 @@ router.put("/:pid", async (req, res) => {
         .json({ error: `Product with id ${productId} not found` });
     }
 
-    res.setHeader("Content-Type", "application/json");
     res.status(200).json({ product });
   } catch (error) {
     console.error("Error updating product:", error.message);
@@ -85,23 +89,22 @@ router.put("/:pid", async (req, res) => {
 router.delete("/:pid", async (req, res) => {
   try {
     const { pid } = req.params;
-
-    if (!pid) {
-      return res.status(400).json({ message: "Product ID is required" });
+    if (!pid || !isValidObjectId(pid)) {
+      return res.status(400).json({
+        error: !pid ? "Product ID is required" : "Invalid product ID",
+      });
     }
 
-    const productId = Number(pid);
-    const deletedProduct = await ProductsManager.deleteProduct(productId);
+    const deletedProduct = await ProductsManager.deleteProduct(pid);
 
     if (!deletedProduct) {
       return res
         .status(404)
-        .json({ message: `Product with id ${productId} not found` });
+        .json({ message: `Product with id ${pid} not found` });
     }
 
-    res.setHeader("Content-Type", "application/json");
     res.status(200).json({
-      message: `Product with id ${productId} deleted successfully`,
+      message: `Product with id ${pid} deleted successfully`,
       product: deletedProduct,
     });
   } catch (error) {

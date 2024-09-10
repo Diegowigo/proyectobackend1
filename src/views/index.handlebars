@@ -10,7 +10,7 @@
   {{#if products.length}}
     <ul>
       {{#each products}}
-        <li>
+        <li id="product-{{this._id}}">
           <strong>Título:</strong> {{this.title}} <br>
           <strong>Descripción:</strong> {{this.description}} <br>
           <strong>Código de Producto:</strong> {{this.code}} <br>

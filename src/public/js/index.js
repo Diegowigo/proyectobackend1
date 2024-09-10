@@ -23,24 +23,30 @@ const editProduct = (id) => {
   const productItem = document.getElementById(`product-${id}`);
   if (productItem) {
     const title = productItem
-      .querySelector("strong:nth-of-type(1)")
-      .nextSibling.nodeValue.trim();
+      .querySelector(".title")
+      .innerText.replace("Título:", "")
+      .trim();
     const description = productItem
-      .querySelector("strong:nth-of-type(2)")
-      .nextSibling.nodeValue.trim();
+      .querySelector(".description")
+      .innerText.replace("Descripción:", "")
+      .trim();
     const code = productItem
-      .querySelector("strong:nth-of-type(3)")
-      .nextSibling.nodeValue.trim();
+      .querySelector(".code")
+      .innerText.replace("Código de Producto:", "")
+      .trim();
     const price = productItem
-      .querySelector("strong:nth-of-type(4)")
-      .nextSibling.nodeValue.trim()
-      .replace("$", "");
+      .querySelector(".price")
+      .innerText.replace("Precio:", "")
+      .replace("$", "")
+      .trim();
     const stock = productItem
-      .querySelector("strong:nth-of-type(5)")
-      .nextSibling.nodeValue.trim();
+      .querySelector(".stock")
+      .innerText.replace("Stock:", "")
+      .trim();
     const category = productItem
-      .querySelector("strong:nth-of-type(6)")
-      .nextSibling.nodeValue.trim();
+      .querySelector(".category")
+      .innerText.replace("Categoría:", "")
+      .trim();
 
     document.getElementById("editProductId").value = id;
     document.getElementById("editTitle").value = title;
@@ -61,6 +67,15 @@ if (editForm) {
   editForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const id = document.getElementById("editProductId").value;
+    console.log("Product ID:", id);
+    if (!id) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Product ID not provided.",
+      });
+      return;
+    }
     const updatedProduct = {
       title: editForm.title.value,
       description: editForm.description.value,
@@ -102,27 +117,19 @@ socket.on("productAdded", (product) => {
   if (productList) {
     const productItem = `
       <li id="product-${product.id}">
-        <strong>Título:</strong> ${product.title} <br>
-        <strong>Descripción:</strong> ${product.description} <br>
-        <strong>Código de Producto:</strong> ${product.code} <br>
-        <strong>Precio:</strong> $${product.price} <br>
-        <strong>Stock:</strong> ${product.stock} <br>
-        <strong>Categoría:</strong> ${product.category} <br>
-        <button onclick="editProduct"('${product.id}')>Editar Producto</button>
-        <button onclick="deleteProduct"('${product.id}')>Eliminar</button>
+        <strong class="title">Título:</strong> ${product.title} <br>
+        <strong class="description">Descripción:</strong> ${product.description} <br>
+        <strong class="code">Código de Producto:</strong> ${product.code} <br>
+        <strong class="price">Precio:</strong> $${product.price} <br>
+        <strong class="stock">Stock:</strong> ${product.stock} <br>
+        <strong class="category">Categoría:</strong> ${product.category} <br>
+        <button onclick="editProduct('${product.id}')">Editar Producto</button>
+        <button onclick="deleteProduct('${product.id}')">Eliminar</button>
       </li>
       <hr>
     `;
     productList.innerHTML += productItem;
   }
-});
-
-socket.on("productError", (data) => {
-  Swal.fire({
-    icon: data.icon,
-    title: data.title,
-    text: data.text,
-  });
 });
 
 const deleteProduct = (id) => {
