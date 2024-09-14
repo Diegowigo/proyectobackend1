@@ -10,6 +10,15 @@ class ProductsManager {
     }
   }
 
+  static async getProductById(id) {
+    try {
+      const product = await productsModel.findById(id);
+      return product;
+    } catch (error) {
+      throw new Error(`Error fetching product by ID: ${id}`, error);
+    }
+  }
+
   static async addProduct(product = {}) {
     try {
       const { code } = product;
