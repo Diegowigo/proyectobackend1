@@ -3,14 +3,14 @@ import CartsManager from "../dao/CartsManager.js";
 
 export const router = Router();
 
-router.post("/", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const newCart = await CartsManager.createCart();
+    const carts = await CartsManager.getCarts();
     res.setHeader("Content-Type", "application/json");
-    res.status(201).json({ newCart });
+    res.status(200).json(carts);
   } catch (error) {
     res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error creating cart" });
+    res.status(500).json({ message: "Error fetching carts" });
   }
 });
 
@@ -18,7 +18,7 @@ router.get("/:cid", async (req, res) => {
   const { cid } = req.params;
 
   try {
-    const products = await CartsManager.getCartProducts(cid);
+    const products = await CartsManager.getCartById(cid);
 
     if (!products) {
       return res.status(404).json({ message: `Cart with id ${cid} not found` });
@@ -29,6 +29,17 @@ router.get("/:cid", async (req, res) => {
   } catch (error) {
     res.setHeader("Content-Type", "application/json");
     res.status(500).json({ message: "Error getting cart products" });
+  }
+});
+
+router.post("/", async (req, res) => {
+  try {
+    const newCart = await CartsManager.createCart();
+    res.setHeader("Content-Type", "application/json");
+    res.status(201).json({ newCart });
+  } catch (error) {
+    res.setHeader("Content-Type", "application/json");
+    res.status(500).json({ message: "Error creating cart" });
   }
 });
 
@@ -50,29 +61,6 @@ router.post("/:cid/products/:pid", async (req, res) => {
   } catch (error) {
     res.setHeader("Content-Type", "application/json");
     res.status(500).json({ message: "Error adding product to cart" });
-  }
-});
-
-router.delete("/:cid/products/:pid", async (req, res) => {
-  const { cid, pid } = req.params;
-
-  try {
-    const updatedCart = await CartsManager.removeProductFromCart(cid, pid);
-
-    if (!updatedCart) {
-      return res.status(404).json({
-        message: `Cart with id ${cid} or product with id ${pid} not found`,
-      });
-    }
-
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({
-      message: `Product with id ${pid} removed from cart`,
-      cart: updatedCart,
-    });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error removing product from cart" });
   }
 });
 
@@ -123,6 +111,29 @@ router.put("/:cid/products/:pid", async (req, res) => {
   } catch (error) {
     res.setHeader("Content-Type", "application/json");
     res.status(500).json({ message: "Error updating product quantity" });
+  }
+});
+
+router.delete("/:cid/products/:pid", async (req, res) => {
+  const { cid, pid } = req.params;
+
+  try {
+    const updatedCart = await CartsManager.removeProductFromCart(cid, pid);
+
+    if (!updatedCart) {
+      return res.status(404).json({
+        message: `Cart with id ${cid} or product with id ${pid} not found`,
+      });
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.status(200).json({
+      message: `Product with id ${pid} removed from cart`,
+      cart: updatedCart,
+    });
+  } catch (error) {
+    res.setHeader("Content-Type", "application/json");
+    res.status(500).json({ message: "Error removing product from cart" });
   }
 });
 

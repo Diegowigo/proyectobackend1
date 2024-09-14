@@ -67,7 +67,6 @@ if (editForm) {
   editForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const id = document.getElementById("editProductId").value;
-    console.log("Product ID:", id);
     if (!id) {
       Swal.fire({
         icon: "error",
@@ -87,6 +86,10 @@ if (editForm) {
     socket.emit("updateProduct", { id, updatedFields: updatedProduct });
   });
 }
+
+const deleteProduct = (id) => {
+  socket.emit("deleteProduct", id);
+};
 
 socket.on("productUpdated", (product) => {
   const productItem = document.getElementById(`product-${product.id}`);
@@ -131,10 +134,6 @@ socket.on("productAdded", (product) => {
     productList.innerHTML += productItem;
   }
 });
-
-const deleteProduct = (id) => {
-  socket.emit("deleteProduct", id);
-};
 
 socket.on("productDeleted", (id) => {
   const productItem = document.getElementById(`product-${id}`);

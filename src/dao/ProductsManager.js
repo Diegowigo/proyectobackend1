@@ -46,7 +46,6 @@ class ProductsManager {
         const codeExists = await productsModel
           .findOne({
             code: updatedFields.code,
-            _id: { $ne: id },
           })
           .lean();
         if (codeExists) {

@@ -36,13 +36,15 @@ class CartsManager {
     }
   }
 
-  static async getCartProducts(cartId) {
+  static async getCartById(cartId) {
     try {
       if (!isValidObjectId(cartId)) {
         throw new Error(`Invalid cart ID: ${cartId}`);
       }
 
-      const cart = await Carts.findById(cartId).lean();
+      const cart = await Carts.findById(cartId)
+        .populate("products.product")
+        .lean();
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -59,7 +61,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID or product ID`);
       }
 
-      const cart = await Carts.findById(cartId).lean();
+      const cart = await Carts.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -90,12 +92,23 @@ class CartsManager {
         throw new Error(`Invalid cart ID or product ID`);
       }
 
-      const cart = await Carts.findById(cartId).lean();
+      const cart = await Carts.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
 
-      cart.products = cart.products.filter((p) => !p.product.equals(productId));
+      const findProduct = cart.products.findIndex((p) =>
+        p.product.equals(productId)
+      );
+      if (findProduct === -1) {
+        throw new Error(`Product with id ${productId} not found in cart`);
+      }
+
+      if (cart.products[findProduct].quantity > 1) {
+        cart.products[findProduct].quantity -= 1;
+      } else {
+        cart.products.splice(findProduct, 1);
+      }
 
       await cart.save();
       return cart;
@@ -110,7 +123,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID: ${cartId}`);
       }
 
-      const cart = await Carts.findById(cartId).lean();
+      const cart = await Carts.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -133,7 +146,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID or product ID`);
       }
 
-      const cart = await Carts.findById(cartId).lean();
+      const cart = await Carts.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -157,7 +170,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID: ${cartId}`);
       }
 
-      const cart = await Carts.findById(cartId).lean();
+      const cart = await Carts.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
