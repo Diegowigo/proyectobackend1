@@ -6,12 +6,31 @@ export const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit);
-    let products = await ProductsManager.getProducts();
-    if (limit && !isNaN(limit)) {
-      products = products.slice(0, limit);
+    const limit = parseInt(req.query.limit) || 10;
+    const query = req.query.query || "";
+    const sort = req.query.sort || "";
+    let page = parseInt(req.query.page) || 1;
+
+    let filter = {};
+    if (query) {
+      filter = { $text: { $search: query } };
     }
-    res.status(200).json({ products });
+
+    let sortOrder = {};
+    if (sort === "asc") {
+      sortOrder = { price: 1 };
+    } else if (sort === "desc") {
+      sortOrder = { price: -1 };
+    }
+
+    const result = await ProductsManager.getProducts(
+      page,
+      limit,
+      filter,
+      sortOrder
+    );
+
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching products:", error.message);
     res.status(500).json({ error: "Error fetching products" });

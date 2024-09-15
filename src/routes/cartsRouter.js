@@ -64,6 +64,18 @@ router.post("/:cid/products/:pid", async (req, res) => {
   }
 });
 
+// router.post("/cart/:cid", async (req, res) => {
+//   try {
+//     const { cartId, productId } = req.params;
+//     const cart = await addProductToCart(cartId, productId);
+//     res.setHeader("Content-Type", "application/json");
+//     res.status(200).json(cart);
+//   } catch (error) {
+//     res.setHeader("Content-Type", "application/json");
+//     res.status(500).json({ error: "Error adding product to cart" });
+//   }
+// });
+
 router.put("/:cid", async (req, res) => {
   const { cid } = req.params;
   const { products } = req.body;

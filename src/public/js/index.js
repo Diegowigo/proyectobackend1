@@ -1,5 +1,112 @@
 const socket = io();
 
+document.addEventListener("DOMContentLoaded", () => {
+  const ulProducts = document.getElementById("product-list");
+  const paginationDiv = document.getElementById("pagination");
+
+  const getProducts = async () => {
+    let params = new URLSearchParams(location.search);
+    let page = params.get("page") || 1;
+
+    let res = await fetch(`/api/products?page=${page}`);
+    let data = await res.json();
+
+    ulProducts.innerHTML = "";
+
+    data.docs.forEach((u) => {
+      let liProduct = document.createElement("li");
+      liProduct.innerHTML = `
+        <strong>Código:</strong> ${u.code} <br>
+        <strong>Título:</strong> ${u.title} <br>
+        <strong>Descripción:</strong> ${u.description} <br>
+        <strong>Precio:</strong> $${u.price} <br>
+        <button class="add-to-cart" data-product-id="${u._id}">Agregar al carrito</button>
+        <hr>
+      `;
+      ulProducts.append(liProduct);
+    });
+
+    paginationDiv.innerHTML = "";
+
+    if (data.hasPrevPage) {
+      const toPrevPage = document.createElement("a");
+      toPrevPage.textContent = `Página Anterior`;
+      toPrevPage.href = `/products?page=${data.prevPage}`;
+      paginationDiv.append(toPrevPage);
+    }
+
+    const currentPage = document.createElement("span");
+    currentPage.textContent = `Página ${data.page} de ${data.totalPages}`;
+    paginationDiv.append(currentPage);
+
+    if (data.hasNextPage) {
+      const toNextPage = document.createElement("a");
+      toNextPage.textContent = `Página Siguiente`;
+      toNextPage.href = `/products?page=${data.nextPage}`;
+      paginationDiv.append(toNextPage);
+    }
+
+    const toFirstPage = document.createElement("a");
+    toFirstPage.textContent = `Primera Página`;
+    toFirstPage.href = `/products?page=1`;
+    paginationDiv.prepend(toFirstPage);
+
+    const toLastPage = document.createElement("a");
+    toLastPage.textContent = `Última Página`;
+    toLastPage.href = `/products?page=${data.totalPages}`;
+    paginationDiv.append(toLastPage);
+  };
+
+  const addToCart = async (productId) => {
+    try {
+      let res = await fetch(`/api/cart/add/${productId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      let result = await res.json();
+      if (res.ok) {
+        alert("Producto agregado al carrito");
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+    }
+  };
+
+  ulProducts.addEventListener("click", (event) => {
+    if (event.target.classList.contains("add-to-cart")) {
+      const productId = event.target.getAttribute("data-product-id");
+      addToCart(productId);
+    }
+  });
+
+  getProducts();
+});
+
+const addToCart = async (productId) => {
+  // Suponiendo que tienes el ID del carrito almacenado en una variable o cookie
+  const cartId = "ID_DEL_CARRITO"; // Reemplaza esto con el ID del carrito actual
+
+  try {
+    let res = await fetch(`/api/cart/${cartId}/products/${productId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (res.ok) {
+      alert("Producto agregado al carrito");
+    } else {
+      alert("Error al agregar producto al carrito");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error al agregar producto al carrito");
+  }
+};
+
 const form = document.getElementById("productForm");
 if (form) {
   form.addEventListener("submit", (e) => {

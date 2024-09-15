@@ -10,22 +10,6 @@ class CartsManager {
     }
   }
 
-  static async saveCarts(carts) {
-    try {
-      return await Carts.bulkWrite(
-        carts.map((cart) => ({
-          updateOne: {
-            filter: { _id: cart._id },
-            update: cart,
-            upsert: true,
-          },
-        }))
-      );
-    } catch (error) {
-      throw new Error(`Error saving carts: ${error.message}`);
-    }
-  }
-
   static async createCart() {
     try {
       const newCart = new Carts({ products: [] });
@@ -43,7 +27,10 @@ class CartsManager {
       }
 
       const cart = await Carts.findById(cartId)
-        .populate("products.product")
+        .populate({
+          path: "products.product",
+          select: "title description code price status stock category",
+        })
         .lean();
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);

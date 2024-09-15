@@ -1,28 +1,58 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Productos</title>
-</head>
-<body>
-  <h1>Productos</h1>
-  {{#if products.length}}
-    <ul>
-      {{#each products}}
-        <li id="product-{{this._id}}">
-          <strong>Título:</strong> {{this.title}} <br>
-          <strong>Descripción:</strong> {{this.description}} <br>
-          <strong>Código de Producto:</strong> {{this.code}} <br>
-          <strong>Precio:</strong> ${{this.price}} <br>
-          <strong>Stock:</strong> {{this.stock}} <br>
-          <strong>Categoría:</strong> {{this.category}} <br>
-        </li>
-        <hr>
-      {{/each}}
-    </ul>
-  {{else}}
-    <p>No hay productos disponibles.</p>
-  {{/if}}
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productos</title>
+  </head>
+  <body>
+
+    <h1>Productos</h1>
+    {{#if products.docs.length}}
+      <ul id="product-list">
+        {{#each products.docs}}
+          <li id="product-{{this._id}}">
+            <strong>Título:</strong>
+            {{this.title}}
+            <br />
+            <strong>Descripción:</strong>
+            {{this.description}}
+            <br />
+            <strong>Código de Producto:</strong>
+            {{this.code}}
+            <br />
+            <strong>Precio:</strong>
+            ${{this.price}}
+            <br />
+            <strong>Stock:</strong>
+            {{this.stock}}
+            <br />
+            <strong>Categoría:</strong>
+            {{this.category}}
+            <br />
+            <button onclick="addToCart('{{this._id}}')">Agregar al Carrito</button>
+          </li>
+          <hr />
+        {{/each}}
+      </ul>
+    {{else}}
+      <p>No hay productos disponibles.</p>
+    {{/if}}
+
+    <div id="pagination">
+      {{#if products.hasPrevPage}}
+        <a href="/products?page={{products.prevPage}}">Página anterior</a>
+      {{/if}}
+
+      <span>Página {{products.page}} de {{products.totalPages}}</span>
+
+      {{#if products.hasNextPage}}
+        <a href="/products?page={{products.nextPage}}">Página siguiente</a>
+      {{/if}}
+
+      <a href="/products?page=1">Primera Página</a>
+      <a href="/products?page={{products.totalPages}}">Última Página</a>
+    </div>
+
+    <script src="/js/index.js"></script>
+  </body>
 </html>

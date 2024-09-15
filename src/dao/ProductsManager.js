@@ -2,9 +2,16 @@ import { productsModel } from "./models/productsModel.js";
 import { isValidObjectId } from "mongoose";
 
 class ProductsManager {
-  static async getProducts() {
+  static async getProducts(page = 1, limit = 10, filter = {}, sortOrder = {}) {
     try {
-      return await productsModel.find().lean();
+      const options = {
+        page,
+        limit,
+        lean: true,
+        sort: sortOrder,
+      };
+
+      return await productsModel.paginate(filter, options);
     } catch (error) {
       throw new Error(`Error fetching products: ${error.message}`);
     }
