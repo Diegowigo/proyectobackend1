@@ -2,9 +2,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Cart {{cart._id}}</title>
   </head>
   <body>
+    <h1>Cart {{cart._id}}</h1>
 
+    {{#if cart.products.length}}
+      <ul>
+        {{#each cart.products}}
+          <li>
+            <strong>Title:</strong>
+            {{this.product.title}}<br />
+            <strong>Description:</strong>
+            {{this.product.description}}<br />
+            <strong>Product Code:</strong>
+            {{this.product.code}}<br />
+            <strong>Price:</strong>
+            ${{this.product.price}}<br />
+            <strong>Quantity:</strong>
+            {{this.quantity}}<br />
+            <hr />
+          </li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p>No products in this cart.</p>
+    {{/if}}
+
+    <a href="/">Back to Products</a>
   </body>
 </html>

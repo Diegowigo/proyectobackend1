@@ -36,7 +36,7 @@ class CartsManager {
         throw new Error(`Cart with id ${cartId} not found`);
       }
 
-      return cart.products;
+      return cart;
     } catch (error) {
       throw new Error(`Error getting cart products: ${error.message}`);
     }

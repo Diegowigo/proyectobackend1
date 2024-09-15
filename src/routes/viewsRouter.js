@@ -34,13 +34,18 @@ router.get("/realtimeproducts", async (req, res) => {
   }
 });
 
-// router.post("/cart/:cid", async (req, res) => {
-//   try {
-//     const { cartId, productId } = req.params;
-//     const cart = await CartsManager.addProductToCart(cartId, productId);
-//     res.status(200).render("index", { cart });
-//   } catch (error) {
-//     console.error("Error adding product to cart:", error.message);
-//     res.status(500).json({ error: "Error adding product to cart" });
-//   }
-// });
+router.get("/carts/:cid", async (req, res) => {
+  try {
+    const cartId = req.params.cid;
+    const cart = await CartsManager.getCartById(cartId);
+
+    if (!cart) {
+      return res.status(404).render("error", { message: "Cart not found" });
+    }
+
+    res.render("cart", { products: cart.products });
+  } catch (error) {
+    console.error("Error fetching cart:", error.message);
+    res.status(500).render("error", { message: "Error fetching cart" });
+  }
+});

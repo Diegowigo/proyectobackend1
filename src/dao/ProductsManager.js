@@ -26,6 +26,14 @@ class ProductsManager {
     }
   }
 
+  static async getProductsForCart(ids) {
+    try {
+      return await productsModel.find({ _id: { $in: ids } });
+    } catch (error) {
+      throw new Error(`Error fetching products by IDs: ${error.message}`);
+    }
+  }
+
   static async addProduct(product = {}) {
     try {
       const { code } = product;

@@ -30,6 +30,7 @@ router.get("/", async (req, res) => {
       sortOrder
     );
 
+    res.setHeader("Content-Type", "application/json");
     res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching products:", error.message);
@@ -47,6 +48,7 @@ router.get("/:pid", async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
+    res.setHeader("Content-Type", "application/json");
     res.json(product);
   } catch (error) {
     console.error("Error fetching product:", error.message);
@@ -68,6 +70,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
     const addedProduct = await ProductsManager.addProduct(newProduct);
+    res.setHeader("Content-Type", "application/json");
     res.status(201).json(addedProduct);
   } catch (error) {
     console.error("Error adding product:", error.message);
@@ -98,6 +101,7 @@ router.put("/:pid", async (req, res) => {
         .json({ error: `Product with id ${productId} not found` });
     }
 
+    res.setHeader("Content-Type", "application/json");
     res.status(200).json({ product });
   } catch (error) {
     console.error("Error updating product:", error.message);
@@ -122,6 +126,7 @@ router.delete("/:pid", async (req, res) => {
         .json({ message: `Product with id ${pid} not found` });
     }
 
+    res.setHeader("Content-Type", "application/json");
     res.status(200).json({
       message: `Product with id ${pid} deleted successfully`,
       product: deletedProduct,

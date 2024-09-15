@@ -57,23 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
     paginationDiv.append(toLastPage);
   };
 
-  const addToCart = async (productId) => {
-    try {
-      let res = await fetch(`/api/cart/add/${productId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      let result = await res.json();
-      if (res.ok) {
-        alert("Producto agregado al carrito");
-      } else {
-        alert(`Error: ${result.error}`);
-      }
-    } catch (error) {
-      console.error("Error adding product to cart:", error);
-    }
-  };
-
   ulProducts.addEventListener("click", (event) => {
     if (event.target.classList.contains("add-to-cart")) {
       const productId = event.target.getAttribute("data-product-id");
@@ -84,28 +67,53 @@ document.addEventListener("DOMContentLoaded", () => {
   getProducts();
 });
 
-const addToCart = async (productId) => {
-  // Suponiendo que tienes el ID del carrito almacenado en una variable o cookie
-  const cartId = "ID_DEL_CARRITO"; // Reemplaza esto con el ID del carrito actual
+// const getCartIdFromQuery = () => {
+//   const params = new URLSearchParams(window.location.search);
+//   return params.get("cartId");
+// };
 
-  try {
-    let res = await fetch(`/api/cart/${cartId}/products/${productId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+// const addToCart = async (productId) => {
+//   const cartId = getCartIdFromQuery();
+//   if (!cartId) {
+//     Swal.fire({
+//       icon: "error",
+//       title: "Cart ID Error",
+//       text: "Could not find the cart ID.",
+//     });
+//     return;
+//   }
 
-    if (res.ok) {
-      alert("Producto agregado al carrito");
-    } else {
-      alert("Error al agregar producto al carrito");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error al agregar producto al carrito");
-  }
-};
+//   try {
+//     let res = await fetch(`/carts/${cartId}`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ productId }),
+//     });
+
+//     if (res.ok) {
+//       Swal.fire({
+//         icon: "success",
+//         title: "Success",
+//         text: "Product added to cart",
+//       });
+//     } else {
+//       Swal.fire({
+//         icon: "error",
+//         title: "Error",
+//         text: "Failed to add product to cart",
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error:", error);
+//     Swal.fire({
+//       icon: "error",
+//       title: "Error",
+//       text: "An error occurred while adding the product to the cart",
+//     });
+//   }
+// };
 
 const form = document.getElementById("productForm");
 if (form) {
