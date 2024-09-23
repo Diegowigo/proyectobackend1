@@ -18,8 +18,20 @@
             <strong>Descripción:</strong>
             {{this.product.description}}
             <br />
+            <strong>Código:</strong>
+            {{this.product.code}}
+            <br />
             <strong>Precio:</strong>
             ${{this.product.price}}
+            <br />
+            <strong>Stock:</strong>
+            {{this.product.stock}}
+            <br />
+            <strong>Categoría:</strong>
+            {{this.product.category}}
+            <br />
+            <strong>Estado:</strong>
+            {{#if this.product.status}}Disponible{{else}}No Disponible{{/if}}
             <br />
             <strong>Cantidad:</strong>
             {{this.quantity}}
@@ -31,7 +43,7 @@
       <p>No hay productos en este carrito.</p>
     {{/if}}
 
-    <a href="/">Volver a Productos</a>
+    <a href="/products">Volver a Productos</a>
 
   </body>
 </html>

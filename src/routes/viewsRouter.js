@@ -34,7 +34,7 @@ router.get("/realtimeproducts", async (req, res) => {
   }
 });
 
-router.get("/:cid", async (req, res) => {
+router.get("/carts/:cid", async (req, res) => {
   const { cid } = req.params;
 
   try {
@@ -44,7 +44,7 @@ router.get("/:cid", async (req, res) => {
       return res.status(404).render("error", { message: "Cart not found" });
     }
 
-    res.render("carts", { cart });
+    res.status(200).render("carts", { cart });
   } catch (error) {
     console.error(error);
     res.status(500).render("error", { message: "Server error" });

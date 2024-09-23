@@ -67,54 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
   getProducts();
 });
 
-// const getCartIdFromQuery = () => {
-//   const params = new URLSearchParams(window.location.search);
-//   return params.get("cartId");
-// };
-
-// const addToCart = async (productId) => {
-//   const cartId = getCartIdFromQuery();
-//   if (!cartId) {
-//     Swal.fire({
-//       icon: "error",
-//       title: "Cart ID Error",
-//       text: "Could not find the cart ID.",
-//     });
-//     return;
-//   }
-
-//   try {
-//     let res = await fetch(`/carts/${cartId}`, {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ productId }),
-//     });
-
-//     if (res.ok) {
-//       Swal.fire({
-//         icon: "success",
-//         title: "Success",
-//         text: "Product added to cart",
-//       });
-//     } else {
-//       Swal.fire({
-//         icon: "error",
-//         title: "Error",
-//         text: "Failed to add product to cart",
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Error:", error);
-//     Swal.fire({
-//       icon: "error",
-//       title: "Error",
-//       text: "An error occurred while adding the product to the cart",
-//     });
-//   }
-// };
-
 const form = document.getElementById("productForm");
 if (form) {
   form.addEventListener("submit", (e) => {
