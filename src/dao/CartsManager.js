@@ -116,9 +116,13 @@ class CartsManager {
       }
 
       cart.products = products.map((p) => ({
-        product: p.product,
+        product: isValidObjectId(p.product) ? p.product : null,
         quantity: p.quantity,
       }));
+
+      if (cart.products.some((p) => p.product === null)) {
+        throw new Error("One or more product IDs are invalid");
+      }
 
       await cart.save();
       return cart;

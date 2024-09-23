@@ -2,33 +2,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cart {{cart._id}}</title>
+    <title>Carrito {{cart._id}}</title>
   </head>
   <body>
-    <h1>Cart {{cart._id}}</h1>
+
+    <h1>Carrito {{cart._id}}</h1>
 
     {{#if cart.products.length}}
       <ul>
         {{#each cart.products}}
           <li>
-            <strong>Title:</strong>
-            {{this.product.title}}<br />
-            <strong>Description:</strong>
-            {{this.product.description}}<br />
-            <strong>Product Code:</strong>
-            {{this.product.code}}<br />
-            <strong>Price:</strong>
-            ${{this.product.price}}<br />
-            <strong>Quantity:</strong>
-            {{this.quantity}}<br />
-            <hr />
+            <strong>Producto:</strong>
+            {{this.product.title}}
+            <br />
+            <strong>Descripción:</strong>
+            {{this.product.description}}
+            <br />
+            <strong>Precio:</strong>
+            ${{this.product.price}}
+            <br />
+            <strong>Cantidad:</strong>
+            {{this.quantity}}
           </li>
+          <hr />
         {{/each}}
       </ul>
     {{else}}
-      <p>No products in this cart.</p>
+      <p>No hay productos en este carrito.</p>
     {{/if}}
 
-    <a href="/">Back to Products</a>
+    <a href="/">Volver a Productos</a>
+
   </body>
 </html>

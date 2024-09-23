@@ -82,7 +82,9 @@ router.put("/:cid", async (req, res) => {
     });
   } catch (error) {
     res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error updating cart products" });
+    res
+      .status(500)
+      .json({ message: `Error updating cart products: ${error.message}` });
   }
 });
 

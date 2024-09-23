@@ -34,18 +34,19 @@ router.get("/realtimeproducts", async (req, res) => {
   }
 });
 
-router.get("/carts/:cid", async (req, res) => {
+router.get("/:cid", async (req, res) => {
+  const { cid } = req.params;
+
   try {
-    const cartId = req.params.cid;
-    const cart = await CartsManager.getCartById(cartId);
+    const cart = await CartsManager.getCartById(cid);
 
     if (!cart) {
       return res.status(404).render("error", { message: "Cart not found" });
     }
 
-    res.render("cart", { products: cart.products });
+    res.render("carts", { cart });
   } catch (error) {
-    console.error("Error fetching cart:", error.message);
-    res.status(500).render("error", { message: "Error fetching cart" });
+    console.error(error);
+    res.status(500).render("error", { message: "Server error" });
   }
 });
