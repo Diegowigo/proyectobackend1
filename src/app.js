@@ -2,11 +2,12 @@ import express from "express";
 import { engine } from "express-handlebars";
 import { Server } from "socket.io";
 import ProductsManager from "./dao/ProductsManager.js";
-import { config } from "./config/config.js";
+import CartsManager from "./dao/CartsManager.js";
 
 import { router as productsRouter } from "./routes/productsRouter.js";
 import { router as cartsRouter } from "./routes/cartsRouter.js";
 import { router as viewsRouter } from "./routes/viewsRouter.js";
+import { config } from "./config/config.js";
 import { connDB } from "./connDB.js";
 
 const PORT = config.PORT;
@@ -71,6 +72,23 @@ io.on("connection", (socket) => {
         text: error.message,
       });
       console.error("Error updating product:", error.message);
+    }
+  });
+
+  socket.on("addToCart", async ({ cartId, productId }) => {
+    try {
+      const updatedCart = await CartsManager.addProductToCart(
+        cartId,
+        productId
+      );
+      io.emit("cartUpdated", updatedCart);
+    } catch (error) {
+      io.emit("cartError", {
+        icon: "error",
+        title: "Error",
+        text: error.message,
+      });
+      console.error("Error adding product to cart:", error.message);
     }
   });
 

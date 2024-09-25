@@ -16,11 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
     data.docs.forEach((u) => {
       let liProduct = document.createElement("li");
       liProduct.innerHTML = `
-        <strong>Código:</strong> ${u.code} <br>
         <strong>Título:</strong> ${u.title} <br>
         <strong>Descripción:</strong> ${u.description} <br>
+        <strong>Código de Producto:</strong> ${u.code} <br>
         <strong>Precio:</strong> $${u.price} <br>
-        <button class="add-to-cart" data-product-id="${u._id}">Agregar al carrito</button>
+        <strong>Stock:</strong> ${u.stock} <br>
+        <strong>Categoría:</strong> ${u.category} <br>
+        <button class="add-to-cart" data-product-id="${u._id}">Agregar al Carrito</button>
         <hr>
       `;
       ulProducts.append(liProduct);
@@ -159,7 +161,7 @@ const deleteProduct = (id) => {
 };
 
 socket.on("productUpdated", (product) => {
-  const productItem = document.getElementById(`product-${product.id}`);
+  const productItem = document.getElementById(`product-${product._id}`);
   if (productItem) {
     productItem.innerHTML = `
       <strong class="title">Título:</strong> ${product.title} <br>
@@ -168,8 +170,8 @@ socket.on("productUpdated", (product) => {
       <strong class="price">Precio:</strong> $${product.price} <br>
       <strong class="stock">Stock:</strong> ${product.stock} <br>
       <strong class="category">Categoría:</strong> ${product.category} <br>
-      <button onclick="editProduct('${product.id}')">Editar Producto</button>
-      <button onclick="deleteProduct('${product.id}')">Eliminar</button>
+      <button onclick="editProduct('${product._id}')">Editar Producto</button>
+      <button onclick="deleteProduct('${product._id}')">Eliminar</button>
     `;
   }
 });
@@ -186,15 +188,15 @@ socket.on("productAdded", (product) => {
   const productList = document.getElementById("productList");
   if (productList) {
     const productItem = `
-      <li id="product-${product.id}">
+      <li id="product-${product._id}">
         <strong class="title">Título:</strong> ${product.title} <br>
         <strong class="description">Descripción:</strong> ${product.description} <br>
         <strong class="code">Código de Producto:</strong> ${product.code} <br>
         <strong class="price">Precio:</strong> $${product.price} <br>
         <strong class="stock">Stock:</strong> ${product.stock} <br>
         <strong class="category">Categoría:</strong> ${product.category} <br>
-        <button onclick="editProduct('${product.id}')">Editar Producto</button>
-        <button onclick="deleteProduct('${product.id}')">Eliminar</button>
+        <button onclick="editProduct('${product._id}')">Editar Producto</button>
+        <button onclick="deleteProduct('${product._id}')">Eliminar</button>
       </li>
       <hr>
     `;
@@ -208,3 +210,14 @@ socket.on("productDeleted", (id) => {
     productItem.remove();
   }
 });
+
+const addToCart = (productId) => {
+  const cartId = "66dfae823a52eead191872c1";
+  socket.emit("addToCart", { cartId, productId });
+
+  Swal.fire({
+    icon: "success",
+    title: "Producto agregado",
+    text: "El producto ha sido agregado al carrito.",
+  });
+};
