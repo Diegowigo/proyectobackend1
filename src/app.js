@@ -4,11 +4,16 @@ import { Server } from "socket.io";
 import ProductsManager from "./dao/ProductsManager.js";
 import CartsManager from "./dao/CartsManager.js";
 
+import { router as sessionsRouter } from "./routes/sessionsRouter.js";
 import { router as productsRouter } from "./routes/productsRouter.js";
 import { router as cartsRouter } from "./routes/cartsRouter.js";
 import { router as viewsRouter } from "./routes/viewsRouter.js";
 import { config } from "./config/config.js";
 import { connDB } from "./connDB.js";
+import { auth } from "./middleware/auth.js";
+import { initPassport } from "./config/passport.config.js";
+import passport from "passport";
+import cookieParser from "cookie-parser";
 
 const PORT = config.PORT;
 const app = express();
@@ -17,10 +22,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./src/public"));
 app.engine("handlebars", engine());
+initPassport();
+app.use(passport.initialize());
+app.use(cookieParser());
 app.set("view engine", "handlebars");
 app.set("views", "./src/views");
 
-app.use("/api/products", productsRouter);
+app.use("/api/sessions", sessionsRouter);
+app.use(
+  "/api/products",
+  passport.authenticate("current", { session: false }),
+  productsRouter
+);
 app.use("/api/carts", cartsRouter);
 app.use("/", viewsRouter);
 
