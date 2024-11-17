@@ -30,7 +30,7 @@ export class SessionsController {
       res.setHeader("Content-Type", "application/json");
       return res.status(201).json({
         payload: `Login exitoso para ${req.user.first_name}`,
-        userLoggedIn: { userDTO },
+        userLoggedIn: userDTO,
       });
     } catch (error) {
       return res
@@ -39,9 +39,15 @@ export class SessionsController {
     }
   };
 
-  static current = (req, res) => {
+  static current = async (req, res) => {
+    let userDTO = await usersService.getBy({ _id: req.user._id });
+
+    if (!userDTO) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     res.setHeader("Content-Type", "application/json");
-    return res.status(200).json({ userLoggedIn: req.user });
+    return res.status(200).json({ userLoggedIn: userDTO });
   };
 
   static callBackGithub = (req, res) => {

@@ -8,7 +8,7 @@ class UsersService {
   async getBy(query) {
     const user = await this.usersDAO.getBy(query);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Usuario no encontrado");
     }
 
     return {
@@ -18,11 +18,6 @@ class UsersService {
       email: user.email,
       role: user.role,
     };
-  }
-
-  async addUser(user) {
-    console.log("pasó x capa servicio...!!!");
-    return await this.usersDAO.addUser(user);
   }
 }
 

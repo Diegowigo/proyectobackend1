@@ -9,7 +9,10 @@ export const usersModel = mongoose.model(
       email: { type: String, unique: true },
       age: Number,
       password: String,
-      cart: String,
+      cart: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "carts",
+      },
       role: { type: String, default: "user" },
     },
     {

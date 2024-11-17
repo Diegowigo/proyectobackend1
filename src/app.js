@@ -10,7 +10,6 @@ import { router as cartsRouter } from "./routes/cartsRouter.js";
 import { router as viewsRouter } from "./routes/viewsRouter.js";
 import { config } from "./config/config.js";
 import { connDB } from "./connDB.js";
-import { auth } from "./middleware/auth.js";
 import { initPassport } from "./config/passport.config.js";
 import passport from "passport";
 import cookieParser from "cookie-parser";

@@ -25,3 +25,10 @@ router.put("/:cid/products/:pid", CartsController.updateProductQuantity);
 router.delete("/:cid/products/:pid", CartsController.removeProductFromCart);
 
 router.delete("/:cid", CartsController.clearCart);
+
+router.post(
+  "/:cid/purchase",
+  passport.authenticate("current", { session: false }),
+  auth(["user"]),
+  CartsController.purchaseCart
+);

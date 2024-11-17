@@ -1,4 +1,8 @@
+import { isValidObjectId } from "mongoose";
 import CartsManager from "../dao/CartsManager.js";
+import ProductsManager from "../dao/ProductsManager.js";
+import { processErrors } from "../utils.js";
+import { ticketModel } from "../dao/models/ticketModel.js";
 
 export class CartsController {
   static getCarts = async (req, res) => {
@@ -165,5 +169,92 @@ export class CartsController {
       res.status(500).json({ message: "Error clearing cart" });
     }
   };
-  //  agregar sgtes
+
+  static purchaseCart = async (req, res) => {
+    let { cid } = req.params;
+
+    if (!isValidObjectId(cid)) {
+      return res.status(400).json({ error: `No existe carrito con id ${cid}` });
+    }
+
+    console.log(`Carrito del usuario autenticado: ${req.user.cart}`);
+    console.log(`Carrito proporcionado en la URL: ${cid}`);
+
+    if (req.user.cart != cid) {
+      return res.status(400).json({
+        error: `El cart que quiere comprar no pertenece al usuario autenticado`,
+      });
+    }
+
+    try {
+      let cart = await CartsManager.getCartById({ _id: cid });
+      if (!cart) {
+        return res.status(400).json({ error: `No existe carrito` });
+      }
+
+      const withStock = [];
+      const withoutStock = [];
+      let error = false;
+
+      for (let i = 0; i < cart.products.length; i++) {
+        let { _id: code, quantity } = cart.products[i].product;
+        let product = await ProductsManager.getProductById({ _id: code });
+
+        if (!product) {
+          error = true;
+          withoutStock.push({ product: code, quantity });
+        } else {
+          if (product.stock >= quantity) {
+            withStock.push({
+              code,
+              quantity,
+              precio: product.price,
+              descrip: product.title,
+              subtotal: product.price * quantity,
+            });
+            product.stock -= quantity;
+            await ProductsManager.updateProduct(code, product);
+          } else {
+            error = true;
+            withoutStock.push({ product: code, quantity });
+          }
+        }
+      }
+
+      if (withStock.length === 0) {
+        return res.status(400).json({
+          error: `No existen ítems en condiciones de ser facturados`,
+        });
+      }
+
+      let nroComp = Date.now();
+      let fecha = new Date();
+      let total = withStock.reduce(
+        (acum, item) => (acum += item.quantity * item.precio),
+        0
+      );
+      let email_comprador = req.user.email;
+
+      let ticket = await ticketModel.create({
+        nroComp,
+        fecha,
+        total,
+        email_comprador,
+        detalle: withStock,
+      });
+
+      cart.products = withoutStock;
+      await CartsManager.updateCartProducts({ _id: cid }, cart);
+
+      const statusCode = error ? 200 : 201;
+      return res.status(statusCode).json({
+        ticket,
+        alerta: error
+          ? `Atención: algún ítem no pudo ser procesado por falta de inventario. Consulte al administrador`
+          : undefined,
+      });
+    } catch (error) {
+      processErrors(res, error);
+    }
+  };
 }

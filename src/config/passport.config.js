@@ -2,7 +2,7 @@ import passport from "passport";
 import local from "passport-local";
 import github from "passport-github2";
 import passportJWT from "passport-jwt";
-import { UsersManager } from "../dao/usersManager.js";
+import { UsersManager } from "../dao/UsersManager.js";
 import { generateHash, validateHash } from "../utils.js";
 import config from "./config.js";
 
@@ -80,10 +80,10 @@ export const initPassport = () => {
         try {
           let user = await UsersManager.getBy({ email: username });
           if (!user) {
-            return done(null, false);
+            return done(null, false, { message: "Credenciales invalidas" });
           }
           if (!validateHash(password, user.password)) {
-            return done(null, false);
+            return done(null, false, { message: "Credenciales invalidas" });
           }
           delete user.password;
           return done(null, user);
