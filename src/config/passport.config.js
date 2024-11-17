@@ -9,8 +9,8 @@ import config from "./config.js";
 const searchToken = (req) => {
   let token = null;
 
-  if (req.cookies.tokenCookie) {
-    token = req.cookies.tokenCookie;
+  if (req.cookies.currentUser) {
+    token = req.cookies.currentUser;
   }
 
   return token;
@@ -26,18 +26,30 @@ export const initPassport = () => {
       },
       async (req, username, password, done) => {
         try {
-          let { first_name } = req.body;
+          let { first_name, last_name, role, age, cart } = req.body;
           if (!first_name) {
             return done(null, false);
           }
-          let { last_name } = req.body;
           if (!last_name) {
+            return done(null, false);
+          }
+          if (role) {
+            role = role.toLowerCase();
+            if (role !== "admin" && role !== "user") {
+              return done(null, false, {
+                message: "Solo se admite rol admin o user",
+              });
+            }
+          }
+          if (!age) {
             return done(null, false);
           }
           let exist = await UsersManager.getBy({ email: username });
           if (exist) {
             console.log(exist);
-            return done(null, false);
+            return done(null, false, {
+              message: `El usuario ${username} ya existe en la base de datos`,
+            });
           }
 
           password = generateHash(password);
@@ -46,7 +58,9 @@ export const initPassport = () => {
             first_name,
             last_name,
             email: username,
+            age,
             password,
+            cart,
           });
           return done(null, newUser);
         } catch (error) {
@@ -89,8 +103,38 @@ export const initPassport = () => {
           searchToken,
         ]),
       },
-      async (usuario, done) => {
+      async (user, done) => {
         try {
+          return done(null, user);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
+
+  passport.use(
+    "github",
+    new github.Strategy(
+      {
+        clientID: "Iv23liFQjA98qyrG5OQ7",
+        clientSecret: "e690cbe4f547df09fef1c0d5158b56220991fbaa",
+        callbackURL: "http://localhost:8080/api/sessions/callbackGithub",
+      },
+      async (token, rt, profile, done) => {
+        try {
+          let { name, email } = profile._json;
+          if (!name || !email) {
+            return done(null, false);
+          }
+          let user = await UsersManager.getUserBy({ email });
+          if (!user) {
+            usuario = await UsersManager.addUser({
+              first_name: name,
+              email,
+              profileGithub: profile,
+            });
+          }
           return done(null, usuario);
         } catch (error) {
           return done(error);
@@ -99,39 +143,3 @@ export const initPassport = () => {
     )
   );
 };
-
-passport.use(
-  "github",
-  new github.Strategy(
-    {
-      clientID: "Iv23liFQjA98qyrG5OQ7",
-      clientSecret: "e690cbe4f547df09fef1c0d5158b56220991fbaa",
-      callbackURL: "http://localhost:8080/api/sessions/callbackGithub",
-    },
-    async (token, rt, profile, done) => {
-      try {
-        let { name, email } = profile._json;
-        if (!name || !email) {
-          return done(null, false);
-        }
-        let user = await UsersManager.getUserBy({ email });
-        if (!user) {
-          usuario = await UsersManager.addUser({
-            first_name: name,
-            email,
-            profileGithub: profile,
-          });
-        }
-        return done(null, usuario);
-      } catch (error) {
-        return done(error);
-      }
-    }
-  )
-);
-
-// http://localhost:8080/api/sessions/callbackGithub
-
-// Client ID: Iv23liFQjA98qyrG5OQ7
-
-// Client secret: e690cbe4f547df09fef1c0d5158b56220991fbaa

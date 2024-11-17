@@ -1,161 +1,27 @@
 import { Router } from "express";
-import CartsManager from "../dao/CartsManager.js";
+import { auth } from "../middleware/auth.js";
+import passport from "passport";
+import { CartsController } from "../controllers/CartsController.js";
 
 export const router = Router();
 
-router.get("/", async (req, res) => {
-  try {
-    const carts = await CartsManager.getCarts();
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json(carts);
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error fetching carts" });
-  }
-});
+router.get("/", CartsController.getCarts);
 
-router.get("/:cid", async (req, res) => {
-  const { cid } = req.params;
+router.get("/:cid", CartsController.getCartById);
 
-  try {
-    const products = await CartsManager.getCartById(cid);
+router.post("/", CartsController.createCart);
 
-    if (!products) {
-      return res.status(404).json({ message: `Cart with id ${cid} not found` });
-    }
+router.post(
+  "/:cid/products/:pid",
+  passport.authenticate("current", { session: false }),
+  auth(["user"]),
+  CartsController.addProductToCart
+);
 
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({ products });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error getting cart products" });
-  }
-});
+router.put("/:cid", CartsController.updateCartProducts);
 
-router.post("/", async (req, res) => {
-  try {
-    const newCart = await CartsManager.createCart();
-    res.setHeader("Content-Type", "application/json");
-    res.status(201).json({ newCart });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error creating cart" });
-  }
-});
+router.put("/:cid/products/:pid", CartsController.updateProductQuantity);
 
-router.post("/:cid/products/:pid", async (req, res) => {
-  const { cid, pid } = req.params;
+router.delete("/:cid/products/:pid", CartsController.removeProductFromCart);
 
-  try {
-    const updatedCart = await CartsManager.addProductToCart(cid, pid);
-
-    if (!updatedCart) {
-      return res.status(404).json({ message: `Cart with id ${cid} not found` });
-    }
-
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({
-      message: `Product with id ${pid} added to cart`,
-      cart: updatedCart,
-    });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error adding product to cart" });
-  }
-});
-
-router.put("/:cid", async (req, res) => {
-  const { cid } = req.params;
-  const { products } = req.body;
-
-  try {
-    const updatedCart = await CartsManager.updateCartProducts(cid, products);
-
-    if (!updatedCart) {
-      return res.status(404).json({ message: `Cart with id ${cid} not found` });
-    }
-
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({
-      message: `Cart with id ${cid} updated`,
-      cart: updatedCart,
-    });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res
-      .status(500)
-      .json({ message: `Error updating cart products: ${error.message}` });
-  }
-});
-
-router.put("/:cid/products/:pid", async (req, res) => {
-  const { cid, pid } = req.params;
-  const { quantity } = req.body;
-
-  try {
-    const updatedCart = await CartsManager.updateProductQuantity(
-      cid,
-      pid,
-      quantity
-    );
-
-    if (!updatedCart) {
-      return res.status(404).json({
-        message: `Cart with id ${cid} or product with id ${pid} not found`,
-      });
-    }
-
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({
-      message: `Product quantity with id ${pid} updated in cart`,
-      cart: updatedCart,
-    });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error updating product quantity" });
-  }
-});
-
-router.delete("/:cid/products/:pid", async (req, res) => {
-  const { cid, pid } = req.params;
-
-  try {
-    const updatedCart = await CartsManager.removeProductFromCart(cid, pid);
-
-    if (!updatedCart) {
-      return res.status(404).json({
-        message: `Cart with id ${cid} or product with id ${pid} not found`,
-      });
-    }
-
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({
-      message: `Product with id ${pid} removed from cart`,
-      cart: updatedCart,
-    });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error removing product from cart" });
-  }
-});
-
-router.delete("/:cid", async (req, res) => {
-  const { cid } = req.params;
-
-  try {
-    const updatedCart = await CartsManager.clearCart(cid);
-
-    if (!updatedCart) {
-      return res.status(404).json({ message: `Cart with id ${cid} not found` });
-    }
-
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({
-      message: `All products removed from cart with id ${cid}`,
-      cart: updatedCart,
-    });
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).json({ message: "Error clearing cart" });
-  }
-});
+router.delete("/:cid", CartsController.clearCart);

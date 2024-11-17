@@ -1,9 +1,15 @@
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: "./src/.env",
+  override: true,
+});
+
 export const config = {
-  PORT: 8080,
-  MONGO_URL:
-    "mongodb+srv://diegowigo:CoderCoder@cluster0.9hzoa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-  DB_NAME: "ecommerce",
-  SECRET: "CoderCoder123",
+  PORT: process.env.PORT || 8080,
+  MONGO_URL: process.env.MONGO_URL,
+  DB_NAME: process.env.DB_NAME,
+  SECRET: process.env.SECRET,
 };
 
 export default config;

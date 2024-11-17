@@ -1,5 +1,6 @@
 import { Carts } from "./models/cartsModel.js";
 import { isValidObjectId } from "mongoose";
+import ProductsManager from "./ProductsManager.js";
 
 class CartsManager {
   static async getCarts() {
@@ -53,13 +54,24 @@ class CartsManager {
         throw new Error(`Cart with id ${cartId} not found`);
       }
 
+      const product = await ProductsManager.getProductById(productId);
+      if (!product) {
+        throw new Error(`Product with id ${productId} not found`);
+      }
+
       const existingProduct = cart.products.find((p) =>
         p.product.equals(productId)
       );
 
       if (existingProduct) {
+        if (existingProduct.quantity + 1 > product.stock) {
+          throw new Error(`Cannot add more products. Stock limit reached.`);
+        }
         existingProduct.quantity += 1;
       } else {
+        if (product.stock < 1) {
+          throw new Error(`Cannot add product. Stock is unavailable.`);
+        }
         cart.products.push({
           product: productId,
           quantity: 1,

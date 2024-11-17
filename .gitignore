@@ -1,3 +1,6 @@
 node_modules
 instrucciones.txt
 products backup.json
+.env
+cartsRouter backup.js
+sessionsRouter backup.js

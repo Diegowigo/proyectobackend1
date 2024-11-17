@@ -2,12 +2,10 @@ import { Router } from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
+import { SessionsController } from "../controllers/SessionsController.js";
 export const router = Router();
 
-router.get("/error", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  return res.status(401).json({ error: `Error al autenticar` });
-});
+router.get("/error", SessionsController.error);
 
 router.post(
   "/register",
@@ -44,19 +42,10 @@ router.post(
 
 router.get(
   "/current",
-  passport.authenticate("current", {
-    session: false,
-    failureRedirect: "/api/sessions/error",
-  }),
+  passport.authenticate("current", { session: false }),
   (req, res) => {
-    let token = jwt.sign(req.user, config.SECRET, { expiresIn: 3600 });
-
-    res.cookie("currentUser", token, { httpOnly: true });
     res.setHeader("Content-Type", "application/json");
-    return res.status(201).json({
-      payload: `Login exitoso para ${req.user.first_name}`,
-      userLoggedIn: req.user,
-    });
+    return res.status(200).json({ userLoggedIn: req.user });
   }
 );
 
