@@ -4,3 +4,4 @@ products backup.json
 .env
 cartsRouter backup.js
 sessionsRouter backup.js
+viewsRouter backup.js
