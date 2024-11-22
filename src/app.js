@@ -13,6 +13,7 @@ import { connDB } from "./connDB.js";
 import { initPassport } from "./config/passport.config.js";
 import passport from "passport";
 import cookieParser from "cookie-parser";
+import { userService } from "./repository/Users.service.js";
 
 const PORT = config.PORT;
 const app = express();
@@ -41,6 +42,7 @@ const server = app.listen(PORT, () => {
 });
 
 connDB();
+userService.initializeAdmin();
 
 const io = new Server(server);
 

@@ -51,36 +51,15 @@ class ProductsManager {
     }
   }
 
-  static async updateProduct(id, updatedFields = {}) {
+  static async updateProduct(productId, data) {
     try {
-      if (!isValidObjectId(id)) {
-        throw new Error(`Invalid product ID: ${id}`);
-      }
-
-      if (updatedFields.code) {
-        const codeExists = await productsModel
-          .findOne({
-            code: updatedFields.code,
-          })
-          .lean();
-        if (codeExists) {
-          throw new Error(
-            `The product code ${updatedFields.code} is already in use.`
-          );
-        }
-      }
-
-      const updatedProduct = await productsModel
-        .findByIdAndUpdate(id, updatedFields, { new: true })
+      return await productsModel
+        .findByIdAndUpdate(productId, data, {
+          new: true,
+        })
         .lean();
-
-      if (!updatedProduct) {
-        throw new Error(`Product with id ${id} not found.`);
-      }
-
-      return updatedProduct;
     } catch (error) {
-      throw new Error(`Error updating product: ${error.message}`);
+      throw new Error("Error actualizando producto: " + error.message);
     }
   }
 

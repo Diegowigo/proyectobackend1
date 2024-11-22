@@ -1,11 +1,11 @@
-import { Carts } from "./models/cartsModel.js";
+import Cart from "./models/cartsModel.js";
 import { isValidObjectId } from "mongoose";
 import ProductsManager from "./ProductsManager.js";
 
 class CartsManager {
   static async getCarts() {
     try {
-      return await Carts.find().lean();
+      return await Cart.find().lean();
     } catch (error) {
       throw new Error(`Error fetching carts: ${error.message}`);
     }
@@ -13,7 +13,7 @@ class CartsManager {
 
   static async createCart() {
     try {
-      const newCart = new Carts({ products: [] });
+      const newCart = new Cart({ products: [] });
       await newCart.save();
       return newCart;
     } catch (error) {
@@ -22,25 +22,8 @@ class CartsManager {
   }
 
   static async getCartById(cartId) {
-    try {
-      if (!isValidObjectId(cartId)) {
-        throw new Error(`Invalid cart ID: ${cartId}`);
-      }
-
-      const cart = await Carts.findById(cartId)
-        .populate({
-          path: "products.product",
-          select: "title description code price status stock category",
-        })
-        .lean();
-      if (!cart) {
-        throw new Error(`Cart with id ${cartId} not found`);
-      }
-
-      return cart;
-    } catch (error) {
-      throw new Error(`Error getting cart products: ${error.message}`);
-    }
+    const cart = await Cart.findById(cartId).populate("products.product");
+    return cart;
   }
 
   static async addProductToCart(cartId, productId) {
@@ -49,7 +32,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID or product ID`);
       }
 
-      const cart = await Carts.findById(cartId);
+      const cart = await Cart.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -91,7 +74,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID or product ID`);
       }
 
-      const cart = await Carts.findById(cartId);
+      const cart = await Cart.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -122,7 +105,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID: ${cartId}`);
       }
 
-      const cart = await Carts.findById(cartId);
+      const cart = await Cart.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -143,13 +126,17 @@ class CartsManager {
     }
   }
 
+  static async updatePurchase(filtro = {}, cartData) {
+    return await Cart.updateOne(filtro, cartData);
+  }
+
   static async updateProductQuantity(cartId, productId, quantity) {
     try {
       if (!isValidObjectId(cartId) || !isValidObjectId(productId)) {
         throw new Error(`Invalid cart ID or product ID`);
       }
 
-      const cart = await Carts.findById(cartId);
+      const cart = await Cart.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }
@@ -173,7 +160,7 @@ class CartsManager {
         throw new Error(`Invalid cart ID: ${cartId}`);
       }
 
-      const cart = await Carts.findById(cartId);
+      const cart = await Cart.findById(cartId);
       if (!cart) {
         throw new Error(`Cart with id ${cartId} not found`);
       }

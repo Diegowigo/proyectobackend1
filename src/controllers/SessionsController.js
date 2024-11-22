@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
-import { usersService } from "../repository/Users.service.js";
+import UsersDTO from "../dto/UsersDTO.js";
 
 export class SessionsController {
   static error = (req, res) => {
@@ -18,13 +18,19 @@ export class SessionsController {
 
   static login = async (req, res) => {
     try {
-      let token = jwt.sign(req.user, config.SECRET, { expiresIn: 3600 });
+      let token = jwt.sign(
+        {
+          id: req.user._id,
+          email: req.user.email,
+          first_name: req.user.first_name,
+          role: req.user.role,
+          cart: req.user.cart,
+        },
+        config.SECRET,
+        { expiresIn: 3600 }
+      );
 
-      let userDTO = await usersService.getBy({ _id: req.user._id });
-
-      if (!userDTO) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      const userDTO = new UsersDTO(req.user);
 
       res.cookie("currentUser", token, { httpOnly: true });
       res.setHeader("Content-Type", "application/json");
@@ -39,16 +45,34 @@ export class SessionsController {
     }
   };
 
-  static current = async (req, res) => {
-    let userDTO = await usersService.getBy({ _id: req.user._id });
+  static async current(req, res) {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Usuario no autenticado" });
+      }
 
-    if (!userDTO) {
-      return res.status(404).json({ message: "User not found" });
+      const response = {
+        id: req.user.id,
+        email: req.user.email,
+        first_name: req.user.first_name,
+        role: req.user.role,
+      };
+
+      if (req.user.cart) {
+        response.cart = req.user.cart;
+      }
+
+      res.status(200).json({
+        message: "Información del usuario obtenida exitosamente",
+        user: response,
+      });
+    } catch (error) {
+      console.error("Error en estrategia current:", error);
+      res
+        .status(500)
+        .json({ error: "Error inesperado al obtener información del usuario" });
     }
-
-    res.setHeader("Content-Type", "application/json");
-    return res.status(200).json({ userLoggedIn: userDTO });
-  };
+  }
 
   static callBackGithub = (req, res) => {
     const token = jwt.sign({ user: req.user }, config.SECRET, {
@@ -66,4 +90,15 @@ export class SessionsController {
       userLoggedIn: req.user,
     });
   };
+
+  static async logout(req, res) {
+    res.clearCookie("currentUser");
+    const { web } = req.query;
+    if (web) {
+      return res.redirect(`/login?mensaje=¡Logout exitoso!`);
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    return res.status(200).json({ mensaje: "¡Logout exitoso!" });
+  }
 }

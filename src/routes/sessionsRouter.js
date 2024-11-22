@@ -37,3 +37,5 @@ router.get(
   passport.authenticate("github", { failureRedirect: "/api/sessions/error" }),
   SessionsController.callBackGithub
 );
+
+router.get("/logout", SessionsController.logout);

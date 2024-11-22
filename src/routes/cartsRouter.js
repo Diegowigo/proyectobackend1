@@ -12,19 +12,39 @@ router.get("/:cid", CartsController.getCartById);
 router.post("/", CartsController.createCart);
 
 router.post(
-  "/:cid/products/:pid",
+  "/:cid/product/:pid",
   passport.authenticate("current", { session: false }),
   auth(["user"]),
   CartsController.addProductToCart
 );
 
-router.put("/:cid", CartsController.updateCartProducts);
+router.put(
+  "/:cid",
+  passport.authenticate("current", { session: false }),
+  auth(["user"]),
+  CartsController.updateCartProducts
+);
 
-router.put("/:cid/products/:pid", CartsController.updateProductQuantity);
+router.put(
+  "/:cid/product/:pid",
+  passport.authenticate("current", { session: false }),
+  auth(["user"]),
+  CartsController.updateProductQuantity
+);
 
-router.delete("/:cid/products/:pid", CartsController.removeProductFromCart);
+router.delete(
+  "/:cid/product/:pid",
+  passport.authenticate("current", { session: false }),
+  auth(["user"]),
+  CartsController.removeProductFromCart
+);
 
-router.delete("/:cid", CartsController.clearCart);
+router.delete(
+  "/:cid",
+  passport.authenticate("current", { session: false }),
+  auth(["user"]),
+  CartsController.clearCart
+);
 
 router.post(
   "/:cid/purchase",

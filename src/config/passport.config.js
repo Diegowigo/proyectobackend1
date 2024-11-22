@@ -5,6 +5,8 @@ import passportJWT from "passport-jwt";
 import { UsersManager } from "../dao/UsersManager.js";
 import { generateHash, validateHash } from "../utils.js";
 import config from "./config.js";
+import { cartService } from "../repository/Cart.service.js";
+import { userService } from "../repository/Users.service.js";
 
 const searchToken = (req) => {
   let token = null;
@@ -26,7 +28,7 @@ export const initPassport = () => {
       },
       async (req, username, password, done) => {
         try {
-          let { first_name, last_name, role, age, cart } = req.body;
+          let { first_name, last_name, role, age } = req.body;
           if (!first_name) {
             return done(null, false);
           }
@@ -44,25 +46,27 @@ export const initPassport = () => {
           if (!age) {
             return done(null, false);
           }
-          let exist = await UsersManager.getBy({ email: username });
+
+          const exist = await userService.getUserBy({ email: username });
           if (exist) {
-            console.log(exist);
             return done(null, false, {
-              message: `El usuario ${username} ya existe en la base de datos`,
+              message: `Ya existe un usuario con email ${username}`,
             });
           }
 
           password = generateHash(password);
 
-          let newUser = await UsersManager.addUser({
+          let newCart = await cartService.createCart();
+          let userData = await UsersManager.addUser({
             first_name,
             last_name,
             email: username,
             age,
             password,
-            cart,
+            cart: newCart,
+            role,
           });
-          return done(null, newUser);
+          return done(null, userData);
         } catch (error) {
           return done(error);
         }

@@ -1,8 +1,10 @@
 import { isValidObjectId } from "mongoose";
 import CartsManager from "../dao/CartsManager.js";
-import ProductsManager from "../dao/ProductsManager.js";
 import { processErrors } from "../utils.js";
 import { ticketModel } from "../dao/models/ticketModel.js";
+import { cartService } from "../repository/Cart.service.js";
+import { productService } from "../repository/Products.service.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class CartsController {
   static getCarts = async (req, res) => {
@@ -38,7 +40,7 @@ export class CartsController {
 
   static createCart = async (req, res) => {
     try {
-      const newCart = await CartsManager.createCart();
+      const newCart = await cartService.createCart();
       res.setHeader("Content-Type", "application/json");
       res.status(201).json({ newCart });
     } catch (error) {
@@ -170,91 +172,104 @@ export class CartsController {
     }
   };
 
-  static purchaseCart = async (req, res) => {
-    let { cid } = req.params;
+  static async purchaseCart(req, res) {
+    const { cid } = req.params;
 
     if (!isValidObjectId(cid)) {
-      return res.status(400).json({ error: `No existe carrito con id ${cid}` });
+      res.setHeader("Content-Type", "application/json");
+      return res.status(400).json({ error: `No existe cart con id ${cid}` });
     }
 
-    console.log(`Carrito del usuario autenticado: ${req.user.cart}`);
-    console.log(`Carrito proporcionado en la URL: ${cid}`);
-
     if (req.user.cart != cid) {
+      res.setHeader("Content-Type", "application/json");
       return res.status(400).json({
         error: `El cart que quiere comprar no pertenece al usuario autenticado`,
       });
     }
 
     try {
-      let cart = await CartsManager.getCartById({ _id: cid });
+      const cart = await cartService.getCartById({ _id: cid });
+
       if (!cart) {
-        return res.status(400).json({ error: `No existe carrito` });
+        res.setHeader("Content-Type", "application/json");
+        return res.status(400).json({ error: `No existe cart` });
       }
 
-      const withStock = [];
-      const withoutStock = [];
+      const conStock = [];
+      const sinStock = [];
       let error = false;
 
-      for (let i = 0; i < cart.products.length; i++) {
-        let { _id: code, quantity } = cart.products[i].product;
-        let product = await ProductsManager.getProductById({ _id: code });
+      if (!cart.products || cart.products.length === 0) {
+        return res.status(400).json({ error: "El cart está vacío" });
+      }
 
-        if (!product) {
+      for (let i = 0; i < cart.products.length; i++) {
+        const codigo = cart.products[i].product._id || cart.products[i].product;
+        const producto = await productService.getProductBy({ _id: codigo });
+        const cantidad = cart.products[i].quantity;
+        if (!producto) {
           error = true;
-          withoutStock.push({ product: code, quantity });
+          sinStock.push({
+            product: codigo,
+            quantity: cantidad,
+          });
         } else {
-          if (product.stock >= quantity) {
-            withStock.push({
-              code,
-              quantity,
-              precio: product.price,
-              descrip: product.title,
-              subtotal: product.price * quantity,
+          if (producto.stock >= cantidad) {
+            conStock.push({
+              codigo,
+              cantidad,
+              precio: producto.price,
+              descrip: producto.description,
+              subtotal: producto.price * cantidad,
             });
-            product.stock -= quantity;
-            await ProductsManager.updateProduct(code, product);
+            producto.stock -= cantidad;
+            await productService.updateProduct(codigo, producto);
           } else {
             error = true;
-            withoutStock.push({ product: code, quantity });
+            sinStock.push({
+              product: codigo,
+              quantity: cantidad,
+            });
           }
         }
       }
 
-      if (withStock.length === 0) {
-        return res.status(400).json({
-          error: `No existen ítems en condiciones de ser facturados`,
-        });
+      if (conStock.length == 0) {
+        res.setHeader("Content-Type", "application/json");
+        return res
+          .status(400)
+          .json({ error: `No existe la cantidad de stock comprado` });
       }
 
-      let nroComp = Date.now();
-      let fecha = new Date();
-      let total = withStock.reduce(
-        (acum, item) => (acum += item.quantity * item.precio),
-        0
-      );
-      let email_comprador = req.user.email;
+      let code = uuidv4();
+      let purchase_datetime = new Date();
+      const amount = conStock.reduce((acum, item) => acum + item.subtotal, 0);
+      let purchaser = req.user.email;
 
       let ticket = await ticketModel.create({
-        nroComp,
-        fecha,
-        total,
-        email_comprador,
-        detalle: withStock,
+        code,
+        purchase_datetime,
+        amount,
+        purchaser,
+        detalle: conStock,
       });
+      cart.products = sinStock;
+      await cartService.updateCart({ _id: cid }, cart);
 
-      cart.products = withoutStock;
-      await CartsManager.updateCartProducts({ _id: cid }, cart);
+      if (error) {
+        res.setHeader("Content-Type", "application/json");
+        return res.status(400).json({
+          ticket,
+          alerta:
+            "Atención: algún item no pudo ser procesado por falta de inventario, consulte al administrador",
+        });
+      } else {
+      }
 
-      const statusCode = error ? 200 : 201;
-      return res.status(statusCode).json({
-        ticket,
-        alerta: error
-          ? `Atención: algún ítem no pudo ser procesado por falta de inventario. Consulte al administrador`
-          : undefined,
-      });
+      res.setHeader("Content-Type", "application/json");
+      return res.status(200).json({ ticket });
     } catch (error) {
       processErrors(res, error);
     }
-  };
+  }
 }
